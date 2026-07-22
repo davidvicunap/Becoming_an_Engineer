@@ -1,0 +1,3422 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Zero to Builder — a first-principles path from complete beginner to shipping real software and AI agents." />
+  <title>Zero to Builder</title>
+  <!-- Inline SVG favicon: no extra file, no 404, works offline. -->
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='0.9em' font-size='90'%3E%E2%9A%A1%3C/text%3E%3C/svg%3E" />
+  <style>
+/* ==========================================================================
+   Zero to Builder — styles
+   Mobile-first. Theme is controlled by [data-theme="dark|light"] on <html>.
+   ========================================================================== */
+
+/* ---------- Design tokens ---------- */
+:root {
+  --font-body: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --radius: 12px;
+  --radius-sm: 8px;
+  --shadow: 0 2px 12px rgba(0, 0, 0, 0.25);
+  --max-width: 960px;
+  --header-h: 3.75rem;
+}
+
+:root[data-theme="dark"] {
+  --bg: #0d1117;
+  --bg-raised: #161b22;
+  --bg-inset: #010409;
+  --border: #30363d;
+  --text: #e6edf3;
+  --text-dim: #9aa4b2;
+  --accent: #58a6ff;
+  --accent-contrast: #0d1117;
+  --green: #3fb950;
+  --red: #f85149;
+  --amber: #d29922;
+  --purple: #bc8cff;
+  --xp: linear-gradient(90deg, #58a6ff, #bc8cff);
+}
+
+:root[data-theme="light"] {
+  --bg: #f6f8fa;
+  --bg-raised: #ffffff;
+  --bg-inset: #eaeef2;
+  --border: #d0d7de;
+  --text: #1f2328;
+  --text-dim: #57606a;
+  --accent: #0969da;
+  --accent-contrast: #ffffff;
+  --green: #1a7f37;
+  --red: #cf222e;
+  --amber: #9a6700;
+  --purple: #8250df;
+  --xp: linear-gradient(90deg, #0969da, #8250df);
+  --shadow: 0 2px 12px rgba(140, 149, 159, 0.2);
+}
+
+/* ---------- Reset-ish base ---------- */
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0;
+  font-family: var(--font-body);
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+img { max-width: 100%; }
+code, pre, textarea.code-input {
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+}
+code {
+  background: var(--bg-inset);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 0.1em 0.35em;
+}
+pre {
+  background: var(--bg-inset);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 0.9rem 1rem;
+  overflow-x: auto;
+}
+pre code { background: none; border: none; padding: 0; }
+a { color: var(--accent); }
+h1, h2, h3, h4 { line-height: 1.25; }
+
+.skip-link {
+  position: absolute;
+  left: -999px;
+  top: 0;
+  background: var(--accent);
+  color: var(--accent-contrast);
+  padding: 0.5rem 1rem;
+  z-index: 100;
+}
+.skip-link:focus { left: 0.5rem; top: 0.5rem; }
+
+button { font-family: inherit; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+/* Router moves focus to <main> on navigation (good for keyboards and screen
+   readers) — but the page-sized focus ring adds nothing. */
+main:focus, main:focus-visible { outline: none; }
+
+/* ---------- Header / HUD ---------- */
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background: var(--bg-raised);
+  border-bottom: 1px solid var(--border);
+}
+/* On phones the HUD gets its own row; one row on wider screens (media query
+   below) — this is what keeps the header inside a 375px viewport. */
+.header-inner {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: 0.5rem 1rem;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  grid-template-areas:
+    "brand nav"
+    "hud   hud";
+  gap: 0.4rem 0.75rem;
+  align-items: center;
+}
+.brand { grid-area: brand; min-width: 0; }
+.brand-name { overflow: hidden; text-overflow: ellipsis; }
+.hud { grid-area: hud; }
+.site-nav { grid-area: nav; justify-content: flex-end; min-width: 0; }
+/* Compact type on phones so brand + nav share one 375px row comfortably. */
+.brand-name { font-size: 0.95rem; }
+.site-nav { gap: 0.5rem; }
+.site-nav a { font-size: 0.85rem; }
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  text-decoration: none;
+  color: var(--text);
+  font-weight: 700;
+}
+.brand-mark { color: var(--accent); font-family: var(--font-mono); }
+.brand-name { white-space: nowrap; }
+
+.hud { display: flex; flex-direction: column; gap: 0.15rem; min-width: 0; }
+.hud-level { display: flex; align-items: center; gap: 0.4rem; font-size: 0.75rem; }
+.hud-level-badge {
+  background: var(--accent);
+  color: var(--accent-contrast);
+  font-weight: 700;
+  border-radius: 999px;
+  min-width: 1.4rem;
+  height: 1.4rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 0.3rem;
+}
+.hud-level-title {
+  color: var(--text-dim);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.hud-xp { display: flex; align-items: center; gap: 0.5rem; }
+.xp-bar {
+  flex: 1;
+  height: 0.45rem;
+  background: var(--bg-inset);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  overflow: hidden;
+  min-width: 3rem;
+}
+.xp-bar-fill {
+  height: 100%;
+  width: 0%;
+  background: var(--xp);
+  border-radius: 999px;
+  transition: width 0.4s ease;
+}
+.hud-xp-text { font-size: 0.7rem; color: var(--text-dim); white-space: nowrap; }
+
+.site-nav { display: flex; align-items: center; gap: 0.75rem; }
+.site-nav a {
+  text-decoration: none;
+  color: var(--text-dim);
+  font-size: 0.9rem;
+  font-weight: 600;
+  padding: 0.25rem 0.1rem;
+  border-bottom: 2px solid transparent;
+}
+.site-nav a:hover { color: var(--text); }
+.site-nav a.active { color: var(--text); border-bottom-color: var(--accent); }
+
+.icon-btn {
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  width: 2.1rem;
+  height: 2.1rem;
+  cursor: pointer;
+  color: var(--text);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.icon-btn:hover { background: var(--bg-inset); }
+/* Sun/moon rendered with plain text so no icon font is needed. */
+:root[data-theme="dark"] .theme-icon::before { content: "☀"; }
+:root[data-theme="light"] .theme-icon::before { content: "☾"; }
+
+/* ---------- Layout ---------- */
+main {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: 1.25rem 1rem 4rem;
+}
+.site-footer {
+  border-top: 1px solid var(--border);
+  color: var(--text-dim);
+  font-size: 0.8rem;
+  text-align: center;
+  padding: 1.5rem 1rem 2.5rem;
+}
+
+/* ---------- Buttons ---------- */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  border: 1px solid var(--border);
+  background: var(--bg-raised);
+  color: var(--text);
+  border-radius: var(--radius-sm);
+  padding: 0.5rem 1rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+}
+.btn:hover { background: var(--bg-inset); }
+.btn-primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--accent-contrast);
+}
+.btn-primary:hover { filter: brightness(1.1); background: var(--accent); }
+.btn-success { background: var(--green); border-color: var(--green); color: #fff; }
+.btn-success:hover { filter: brightness(1.1); background: var(--green); }
+.btn[disabled] { opacity: 0.5; cursor: not-allowed; }
+.btn-sm { padding: 0.3rem 0.7rem; font-size: 0.8rem; }
+
+/* ---------- Hero (home) ---------- */
+.hero { text-align: center; padding: 1.5rem 0 0.5rem; }
+.hero h1 { font-size: 1.9rem; margin: 0 0 0.5rem; }
+.hero h1 .grad {
+  background: var(--xp);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.hero p { color: var(--text-dim); max-width: 38rem; margin: 0 auto 1rem; }
+
+.free-roam {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.8rem;
+  color: var(--text-dim);
+  cursor: pointer;
+  user-select: none;
+}
+.free-roam input { accent-color: var(--accent); width: 1rem; height: 1rem; }
+
+/* ---------- Roadmap ---------- */
+.roadmap { list-style: none; margin: 2rem 0 0; padding: 0; position: relative; }
+/* The connecting line down the left side that makes it read as a path. */
+.roadmap::before {
+  content: "";
+  position: absolute;
+  left: 1.35rem;
+  top: 1rem;
+  bottom: 1rem;
+  width: 3px;
+  background: var(--border);
+  border-radius: 3px;
+}
+.roadmap-item { position: relative; padding: 0 0 1.1rem 3.4rem; }
+.roadmap-node {
+  position: absolute;
+  left: 0;
+  top: 0.35rem;
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: 50%;
+  border: 3px solid var(--border);
+  background: var(--bg-raised);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 1rem;
+  z-index: 1;
+}
+.roadmap-item.done .roadmap-node { border-color: var(--green); color: var(--green); }
+.roadmap-item.unlocked .roadmap-node { border-color: var(--accent); color: var(--accent); }
+.roadmap-item.locked .roadmap-node { color: var(--text-dim); }
+
+.module-card {
+  display: block;
+  background: var(--bg-raised);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 0.9rem 1.1rem;
+  text-decoration: none;
+  color: var(--text);
+  transition: border-color 0.15s ease, transform 0.15s ease;
+}
+a.module-card:hover { border-color: var(--accent); transform: translateX(3px); }
+.module-card h3 { margin: 0 0 0.2rem; font-size: 1.05rem; }
+.module-card p { margin: 0 0 0.5rem; color: var(--text-dim); font-size: 0.875rem; }
+.module-card.locked { opacity: 0.65; }
+.module-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem 0.9rem;
+  align-items: center;
+  font-size: 0.75rem;
+  color: var(--text-dim);
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.7rem;
+  font-weight: 700;
+  border-radius: 999px;
+  padding: 0.1rem 0.6rem;
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+}
+.badge-done { border-color: var(--green); color: var(--green); }
+.badge-unlocked { border-color: var(--accent); color: var(--accent); }
+.badge-stub { border-color: var(--amber); color: var(--amber); }
+.badge-flagship { border-color: var(--purple); color: var(--purple); }
+
+.mini-progress {
+  height: 0.3rem;
+  background: var(--bg-inset);
+  border-radius: 999px;
+  overflow: hidden;
+  margin-top: 0.6rem;
+}
+.mini-progress-fill { height: 100%; background: var(--xp); border-radius: 999px; }
+
+/* ---------- Module page ---------- */
+.crumbs { font-size: 0.8rem; color: var(--text-dim); margin-bottom: 0.75rem; }
+.crumbs a { color: var(--text-dim); }
+.page-head h1 { margin: 0 0 0.25rem; font-size: 1.6rem; }
+.page-head .tagline { color: var(--text-dim); margin: 0 0 1.25rem; }
+
+.item-list { list-style: none; padding: 0; margin: 1rem 0; display: grid; gap: 0.6rem; }
+.item-row {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  background: var(--bg-raised);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 0.75rem 1rem;
+  text-decoration: none;
+  color: var(--text);
+}
+a.item-row:hover { border-color: var(--accent); }
+.item-icon { font-size: 1.1rem; width: 1.6rem; text-align: center; flex-shrink: 0; }
+.item-row .grow { flex: 1; min-width: 0; }
+.item-row h4 { margin: 0; font-size: 0.95rem; }
+.item-row .sub { font-size: 0.75rem; color: var(--text-dim); }
+.check { color: var(--green); font-weight: 700; flex-shrink: 0; }
+
+/* ---------- Lesson content ---------- */
+.lesson-body { max-width: 44rem; }
+.lesson-body h2 { font-size: 1.2rem; margin-top: 2rem; }
+.lesson-body p, .lesson-body li { font-size: 0.95rem; }
+.lesson-body blockquote {
+  margin: 1rem 0;
+  padding: 0.6rem 1rem;
+  border-left: 3px solid var(--accent);
+  background: var(--bg-raised);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  color: var(--text-dim);
+}
+.callout {
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--purple);
+  background: var(--bg-raised);
+  border-radius: var(--radius-sm);
+  padding: 0.75rem 1rem;
+  margin: 1.25rem 0;
+  font-size: 0.9rem;
+}
+.callout strong:first-child { color: var(--purple); }
+.callout-tradeoff { border-left-color: var(--amber); }
+.callout-tradeoff strong:first-child { color: var(--amber); }
+
+.lesson-nav {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-top: 2.5rem;
+  flex-wrap: wrap;
+}
+
+/* ---------- Challenge / editor ---------- */
+.challenge {
+  margin-top: 2.5rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-raised);
+  overflow: hidden;
+}
+.challenge-head {
+  padding: 0.8rem 1rem;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+.challenge-head h3 { margin: 0; font-size: 1rem; flex: 1; }
+.lang-chip {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 0.15rem 0.5rem;
+  border-radius: 4px;
+  background: var(--bg-inset);
+  border: 1px solid var(--border);
+  color: var(--amber);
+}
+.challenge-prompt { padding: 0.9rem 1rem 0; font-size: 0.9rem; }
+.challenge-prompt p:first-child { margin-top: 0; }
+
+.editor-wrap { padding: 0.9rem 1rem; }
+textarea.code-input {
+  width: 100%;
+  min-height: 14rem;
+  resize: vertical;
+  background: var(--bg-inset);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 0.8rem;
+  line-height: 1.5;
+  tab-size: 2;
+  white-space: pre;
+  overflow-wrap: normal;
+  overflow-x: auto;
+}
+textarea.code-input:focus-visible { outline: 2px solid var(--accent); border-color: var(--accent); }
+
+.challenge-actions {
+  display: flex;
+  gap: 0.5rem;
+  padding: 0 1rem 0.9rem;
+  flex-wrap: wrap;
+  align-items: center;
+}
+.challenge-status { font-size: 0.8rem; color: var(--text-dim); margin-left: auto; }
+
+.console {
+  margin: 0 1rem 1rem;
+  background: var(--bg-inset);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 0.7rem 0.9rem;
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  white-space: pre-wrap;
+  word-break: break-word;
+  max-height: 16rem;
+  overflow-y: auto;
+}
+.console:empty { display: none; }
+.console .ok { color: var(--green); }
+.console .err { color: var(--red); }
+.console .hint { color: var(--amber); }
+.console .dim { color: var(--text-dim); }
+
+/* ---------- Project brief / checklist ---------- */
+.project-brief { max-width: 44rem; }
+.checklist { list-style: none; padding: 0; margin: 1rem 0; display: grid; gap: 0.5rem; }
+.checklist li {
+  background: var(--bg-raised);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+}
+.checklist label {
+  display: flex;
+  gap: 0.7rem;
+  align-items: flex-start;
+  padding: 0.7rem 0.9rem;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+.checklist input {
+  accent-color: var(--green);
+  width: 1.1rem;
+  height: 1.1rem;
+  margin-top: 0.15rem;
+  flex-shrink: 0;
+}
+.checklist li.ticked { border-color: var(--green); }
+.checklist li.ticked label { color: var(--text-dim); text-decoration: line-through; }
+
+/* ---------- Achievements ---------- */
+.shelf {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 0.8rem;
+  margin-top: 1.5rem;
+  padding: 0;
+  list-style: none;
+}
+.trophy {
+  background: var(--bg-raised);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1rem;
+  display: flex;
+  gap: 0.8rem;
+  align-items: flex-start;
+}
+.trophy .emoji { font-size: 1.7rem; line-height: 1; }
+.trophy h4 { margin: 0 0 0.15rem; font-size: 0.95rem; }
+.trophy p { margin: 0; font-size: 0.78rem; color: var(--text-dim); }
+.trophy.locked { opacity: 0.45; filter: grayscale(1); }
+.trophy.earned { border-color: var(--purple); }
+.trophy .earned-date { display: block; margin-top: 0.3rem; font-size: 0.7rem; color: var(--purple); }
+
+/* ---------- Toasts ---------- */
+.toasts {
+  position: fixed;
+  bottom: 1rem;
+  right: 1rem;
+  left: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  z-index: 50;
+  pointer-events: none;
+}
+.toast {
+  background: var(--bg-raised);
+  border: 1px solid var(--accent);
+  border-radius: var(--radius-sm);
+  padding: 0.7rem 1rem;
+  box-shadow: var(--shadow);
+  font-size: 0.85rem;
+  animation: toast-in 0.25s ease, toast-out 0.4s ease 3.6s forwards;
+  margin-left: auto;
+  max-width: 22rem;
+}
+.toast-achievement { border-color: var(--purple); }
+@keyframes toast-in { from { transform: translateY(10px); opacity: 0; } }
+@keyframes toast-out { to { transform: translateY(10px); opacity: 0; } }
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+  html { scroll-behavior: auto; }
+}
+
+/* ---------- Wider screens ---------- */
+@media (min-width: 700px) {
+  .hero h1 { font-size: 2.4rem; }
+  .header-inner {
+    padding: 0.6rem 1.5rem;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    grid-template-areas: "brand hud nav";
+  }
+  .brand-name { font-size: 1rem; }
+  .site-nav { gap: 0.75rem; }
+  .site-nav a { font-size: 0.9rem; }
+  main { padding: 2rem 1.5rem 5rem; }
+  .toasts { left: auto; }
+  .roadmap::before { left: 1.6rem; }
+  .roadmap-item { padding-left: 4rem; }
+  .roadmap-node { width: 3.25rem; height: 3.25rem; }
+}
+
+  </style>
+  <!--
+    This <script> runs before anything renders so the saved theme is applied
+    immediately and the page never "flashes" the wrong colors.
+  -->
+  <script>
+    (function () {
+      try {
+        var raw = localStorage.getItem("ztb.state.v1");
+        var theme = raw ? (JSON.parse(raw).settings || {}).theme : null;
+        if (!theme) {
+          theme = window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";
+        }
+        document.documentElement.setAttribute("data-theme", theme);
+      } catch (e) {
+        document.documentElement.setAttribute("data-theme", "dark");
+      }
+    })();
+  </script>
+</head>
+<body>
+  <a class="skip-link" href="#app">Skip to content</a>
+
+  <header class="site-header">
+    <div class="header-inner">
+      <a class="brand" href="#/" aria-label="Zero to Builder home">
+        <span class="brand-mark" aria-hidden="true">⟨/⟩</span>
+        <span class="brand-name">Zero&nbsp;to&nbsp;Builder</span>
+      </a>
+
+      <!-- Live progress readout: level, XP, and a bar toward the next level. -->
+      <div class="hud" role="status" aria-live="polite">
+        <div class="hud-level">
+          <span class="hud-level-badge" id="hud-level">1</span>
+          <span class="hud-level-title" id="hud-title">Curious Human</span>
+        </div>
+        <div class="hud-xp">
+          <div class="xp-bar" aria-hidden="true"><div class="xp-bar-fill" id="hud-xp-fill"></div></div>
+          <span class="hud-xp-text" id="hud-xp-text">0 XP</span>
+        </div>
+      </div>
+
+      <nav class="site-nav" aria-label="Primary">
+        <a href="#/" data-nav="home">Path</a>
+        <a href="#/achievements" data-nav="achievements">Achievements</a>
+        <button id="theme-toggle" class="icon-btn" type="button"
+                aria-label="Toggle dark or light mode" title="Toggle theme">
+          <span class="theme-icon" aria-hidden="true"></span>
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Every view (roadmap, module, lesson, project…) renders into this element. -->
+  <main id="app" tabindex="-1"></main>
+
+  <footer class="site-footer">
+    <p>Built by you, for you. Everything runs in your browser — your progress lives in
+       <code>localStorage</code> and never leaves this device.</p>
+  </footer>
+
+  <!-- Toast container for XP gains and achievement unlocks. -->
+  <div id="toasts" class="toasts" aria-live="polite"></div>
+
+  <script type="module">
+
+/* ================= js/state.js ================= */
+const state = (function () {
+/**
+ * state.js — the single source of truth for learner progress.
+ *
+ * Everything lives in one JSON blob under one localStorage key, so:
+ *   - a page refresh loses nothing,
+ *   - backing up your progress is "copy one string",
+ *   - there are no accounts and no network calls.
+ *
+ * Shape of the persisted state:
+ * {
+ *   xp: 0,                                 // total XP ever earned
+ *   completedLessons:  { "m1-l1": true },  // lessonKey -> true
+ *   passedChallenges:  { "m1-l1": true },  // challenges are keyed by their lesson
+ *   projectChecks:     { "m1": { "c1": true } }, // per-project checklist ticks
+ *   completedProjects: { "m1": true },
+ *   achievements:      { "rubber-duck": 1712345678901 }, // id -> unlock timestamp
+ *   savedCode:         { "m1-l1": "..." }, // learner's editor drafts
+ *   settings:          { theme: "dark", freeRoam: false }
+ * }
+ */
+
+const KEY = "ztb.state.v1";
+
+/** XP rewards, kept in one place so rebalancing is a one-line change. */
+const XP = { lesson: 25, challenge: 50, project: 100 };
+
+/** Each level costs 150 XP. Titles give levels some personality. */
+const XP_PER_LEVEL = 150;
+const LEVEL_TITLES = [
+  "Curious Human",     // level 1
+  "Pattern Spotter",
+  "Problem Splitter",
+  "Debugger",
+  "Builder",
+  "Full-Stack Thinker",
+  "Shipper",
+  "Agent Architect",
+  "Systems Engineer",
+  "Zero to Builder",   // level 10+
+];
+
+function defaults() {
+  return {
+    xp: 0,
+    completedLessons: {},
+    passedChallenges: {},
+    projectChecks: {},
+    completedProjects: {},
+    achievements: {},
+    savedCode: {},
+    settings: { theme: null, freeRoam: false },
+  };
+}
+
+/** Load once at startup; all reads/writes go through this in-memory object. */
+let state = load();
+
+function load() {
+  try {
+    const raw = localStorage.getItem(KEY);
+    if (!raw) return defaults();
+    // Merge over defaults so adding new fields later never breaks old saves.
+    return { ...defaults(), ...JSON.parse(raw) };
+  } catch {
+    return defaults();
+  }
+}
+
+function save() {
+  try {
+    localStorage.setItem(KEY, JSON.stringify(state));
+  } catch {
+    // Storage full or blocked (e.g. private mode) — the app still works,
+    // progress just won't survive the session. Nothing to crash over.
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/* Simple pub/sub so the header HUD re-renders whenever progress moves. */
+/* ------------------------------------------------------------------ */
+const listeners = new Set();
+function subscribe(fn) { listeners.add(fn); }
+function notify() { listeners.forEach((fn) => fn(state)); }
+
+/* ---------------- XP & levels ---------------- */
+
+function getXP() { return state.xp; }
+
+function getLevel() {
+  const level = Math.floor(state.xp / XP_PER_LEVEL) + 1;
+  const title = LEVEL_TITLES[Math.min(level, LEVEL_TITLES.length) - 1];
+  const intoLevel = state.xp % XP_PER_LEVEL;
+  return { level, title, intoLevel, needed: XP_PER_LEVEL, pct: (intoLevel / XP_PER_LEVEL) * 100 };
+}
+
+function addXP(amount, reason) {
+  state.xp += amount;
+  save();
+  notify();
+  toast(`+${amount} XP — ${reason}`);
+}
+
+/* ---------------- Lessons ---------------- */
+
+function isLessonDone(lessonKey) { return !!state.completedLessons[lessonKey]; }
+
+function completeLesson(lessonKey, lessonTitle) {
+  if (state.completedLessons[lessonKey]) return false; // XP only once
+  state.completedLessons[lessonKey] = true;
+  save();
+  addXP(XP.lesson, `finished “${lessonTitle}”`);
+  return true;
+}
+
+/* ---------------- Challenges ---------------- */
+
+function isChallengePassed(lessonKey) { return !!state.passedChallenges[lessonKey]; }
+
+function passChallenge(lessonKey, challengeTitle) {
+  if (state.passedChallenges[lessonKey]) return false;
+  state.passedChallenges[lessonKey] = true;
+  save();
+  addXP(XP.challenge, `passed “${challengeTitle}”`);
+  return true;
+}
+
+/** Draft code persistence so a refresh never eats your work. */
+function getSavedCode(lessonKey) { return state.savedCode[lessonKey] ?? null; }
+function saveCode(lessonKey, code) {
+  state.savedCode[lessonKey] = code;
+  save();
+}
+
+/* ---------------- Projects ---------------- */
+
+function getProjectChecks(projectId) { return state.projectChecks[projectId] || {}; }
+
+function setProjectCheck(projectId, itemId, checked) {
+  if (!state.projectChecks[projectId]) state.projectChecks[projectId] = {};
+  state.projectChecks[projectId][itemId] = checked;
+  save();
+  notify();
+}
+
+function isProjectDone(projectId) { return !!state.completedProjects[projectId]; }
+
+function completeProject(projectId, projectTitle) {
+  if (state.completedProjects[projectId]) return false;
+  state.completedProjects[projectId] = true;
+  save();
+  addXP(XP.project, `shipped project “${projectTitle}”`);
+  return true;
+}
+
+/**
+ * Read-only snapshot of progress maps, used by achievement checks.
+ * Copies, so nothing outside this module can mutate state by accident.
+ */
+function snapshot() {
+  return {
+    completedLessons: { ...state.completedLessons },
+    passedChallenges: { ...state.passedChallenges },
+    completedProjects: { ...state.completedProjects },
+  };
+}
+
+/* ---------------- Achievements ---------------- */
+
+function hasAchievement(id) { return !!state.achievements[id]; }
+function getAchievements() { return { ...state.achievements }; }
+
+function unlockAchievement(def) {
+  if (!def || state.achievements[def.id]) return false;
+  state.achievements[def.id] = Date.now();
+  save();
+  notify();
+  toast(`${def.emoji} Achievement unlocked: ${def.name}`, "toast-achievement");
+  return true;
+}
+
+/* ---------------- Settings ---------------- */
+
+function getTheme() {
+  return (
+    state.settings.theme ||
+    (window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark")
+  );
+}
+
+function toggleTheme() {
+  const next = getTheme() === "dark" ? "light" : "dark";
+  state.settings.theme = next;
+  save();
+  document.documentElement.setAttribute("data-theme", next);
+  return next;
+}
+
+function isFreeRoam() { return !!state.settings.freeRoam; }
+function setFreeRoam(on) {
+  state.settings.freeRoam = on;
+  save();
+  notify();
+}
+
+/* ---------------- Toasts ---------------- */
+
+/** Tiny notification helper — lives here because state changes trigger it. */
+function toast(message, extraClass = "") {
+  const holder = document.getElementById("toasts");
+  if (!holder) return;
+  const el = document.createElement("div");
+  el.className = `toast ${extraClass}`;
+  el.textContent = message;
+  holder.appendChild(el);
+  setTimeout(() => el.remove(), 4200); // matches the CSS toast-out timing
+}
+
+  return { XP, subscribe, getXP, getLevel, addXP, isLessonDone, completeLesson, isChallengePassed, passChallenge, getSavedCode, saveCode, getProjectChecks, setProjectCheck, isProjectDone, completeProject, snapshot, hasAchievement, getAchievements, unlockAchievement, getTheme, toggleTheme, isFreeRoam, setFreeRoam, toast };
+})();
+
+/* ================= js/data/achievements.js ================= */
+/**
+ * achievements.js — every achievement maps to a real engineering competency.
+ *
+ * `check(ctx)` receives a snapshot of progress and returns true when the
+ * achievement should unlock. Checks run after every lesson/challenge/project
+ * completion (see views.js), so unlocks feel immediate.
+ *
+ * ctx = {
+ *   completedLessons, passedChallenges, completedProjects,  // maps of keys
+ *   modules,                                                 // curriculum
+ *   isModuleComplete(moduleId),                              // helper
+ * }
+ */
+
+const ACHIEVEMENTS = [
+  {
+    id: "hello-world",
+    emoji: "👋",
+    name: "Hello, World",
+    competency: "You started. Most people never do.",
+    check: (ctx) => Object.keys(ctx.completedLessons).length >= 1,
+  },
+  {
+    id: "first-principles",
+    emoji: "🧱",
+    name: "First Principles",
+    competency: "Can explain what a computer, a program, and the internet actually are.",
+    check: (ctx) => ctx.isModuleComplete("m1"),
+  },
+  {
+    id: "rubber-duck",
+    emoji: "🦆",
+    name: "Rubber Duck",
+    competency: "Debugged a broken program using hypothesis → test → conclusion.",
+    check: (ctx) => !!ctx.passedChallenges["m2-l2"],
+  },
+  {
+    id: "read-the-docs",
+    emoji: "📚",
+    name: "Read The Docs",
+    competency: "Solved a problem by reading documentation instead of guessing.",
+    check: (ctx) => !!ctx.passedChallenges["m2-l3"],
+  },
+  {
+    id: "decomposer",
+    emoji: "🪓",
+    name: "Decomposer",
+    competency: "Broke a big fuzzy problem into small solvable steps.",
+    check: (ctx) => !!ctx.passedChallenges["m2-l1"],
+  },
+  {
+    id: "polyglot",
+    emoji: "🌐",
+    name: "Polyglot",
+    competency: "Passed challenges in two different programming languages.",
+    check: (ctx) =>
+      !!ctx.passedChallenges["m3-l4"] &&
+      Object.keys(ctx.passedChallenges).some(
+        (k) => k.startsWith("m3-") && k !== "m3-l4"
+      ),
+  },
+  {
+    id: "state-of-mind",
+    emoji: "🧠",
+    name: "State of Mind",
+    competency: "Used variables, control flow, and functions to model a real process.",
+    check: (ctx) => ctx.isModuleComplete("m3"),
+  },
+  {
+    id: "context-wrangler",
+    emoji: "🪟",
+    name: "Context Window Wrangler",
+    competency: "Managed an LLM context window budget in working code.",
+    check: (ctx) => !!ctx.passedChallenges["m7-l1"],
+  },
+  {
+    id: "agent-architect",
+    emoji: "🤖",
+    name: "Agent Architect",
+    competency: "Built a working tool-using agent loop: reason → act → observe → repeat.",
+    check: (ctx) => !!ctx.passedChallenges["m7-l2"],
+  },
+  {
+    id: "local-brain",
+    emoji: "🏠",
+    name: "Local Brain",
+    competency: "Ran an open-source LLM on your own machine. Private by default.",
+    check: (ctx) => !!ctx.completedProjects["m7"],
+  },
+  {
+    id: "ship-it",
+    emoji: "🚀",
+    name: "Ship It",
+    competency: "Deployed something real to the public internet.",
+    check: (ctx) => !!ctx.completedProjects["m6"],
+  },
+  {
+    id: "private-by-design",
+    emoji: "🔒",
+    name: "Private by Design",
+    competency: "Built something useful with zero third-party data leakage.",
+    check: (ctx) => !!ctx.completedProjects["m8"],
+  },
+];
+
+function getAchievementDef(id) {
+  return ACHIEVEMENTS.find((a) => a.id === id) || null;
+}
+
+/* ================= js/data/module1.js ================= */
+/**
+ * Module 1 — How Things Actually Work (first principles).
+ *
+ * Content schema (same for every module file — documented once in README.md):
+ * {
+ *   id, number, title, tagline, status: "ready" | "stub", flagship?: bool,
+ *   lessons: [{ id, title, minutes, content: <HTML string>, challenge?, stub?: bool }],
+ *   project: { id, title, brief: <HTML string>, checklist: [{ id, text }] } | null
+ * }
+ *
+ * challenge: {
+ *   title, language: "js" | "python", prompt: <HTML string>,
+ *   starterCode: <string>, hint: <string>,
+ *   tests: [{ name, code: <source appended after learner code>, hint }]
+ * }
+ */
+
+const module1 = {
+  id: "m1",
+  number: 1,
+  title: "How Things Actually Work",
+  tagline: "Computers, programs, memory, and the internet — from atoms up. Reason from fundamentals, not memorized magic.",
+  status: "ready",
+
+  lessons: [
+    /* ----------------------------------------------------------------- */
+    {
+      id: "l1",
+      title: "A computer is just switches",
+      minutes: 12,
+      content: `
+<p>Strip away the glass and aluminum and a computer is <strong>billions of tiny
+switches</strong> (transistors) that can each be ON or OFF. That's it. There is no
+"understanding" inside — just switches flipping other switches, billions of times
+per second.</p>
+
+<h2>Why switches are enough</h2>
+<p>One switch stores almost nothing: ON or OFF, which we write as <code>1</code> or
+<code>0</code> — a <em>bit</em>. But combine bits and you can represent anything
+countable:</p>
+<ul>
+  <li>8 bits (a <em>byte</em>) has 256 combinations — enough for every letter,
+      digit, and symbol on your keyboard.</li>
+  <li>The letter <code>H</code> is, by agreement, the number 72. The letter
+      <code>i</code> is 105. "Hi" is just <code>72, 105</code>.</li>
+  <li>Colors? Three numbers (red, green, blue). Sound? Thousands of numbers per
+      second describing air pressure. Video? Grids of color numbers over time.</li>
+</ul>
+<blockquote>Everything your computer has ever shown you — every photo, song, and
+message — is numbers, and every number is bits, and every bit is a switch.</blockquote>
+
+<h2>The trick that makes it feel like magic: layers</h2>
+<p>Nobody builds an app by flipping switches. Engineering's superpower is
+<strong>abstraction</strong> — building a layer, trusting it, and building the next
+layer on top:</p>
+<pre><code>switches → logic gates → circuits that add numbers → a processor (CPU)
+→ machine instructions → programming languages → apps you use daily</code></pre>
+<p>Each layer only needs to trust the layer below it, not understand every detail.
+That's why one person <em>can</em> understand computers: you don't memorize the whole
+tower, you learn what each layer <em>promises</em> to the one above it.</p>
+
+<div class="callout"><strong>First-principles habit:</strong> when something feels
+like magic, ask "what is this made of, one layer down?" You rarely need to go more
+than one or two layers to dissolve the mystery.</div>
+`,
+      challenge: {
+        title: "Text is just numbers",
+        language: "js",
+        prompt: `
+<p>Prove the lesson to yourself. In JavaScript, <code>"Hi".charCodeAt(0)</code>
+returns <code>72</code> — the number for <code>H</code> — and
+<code>String.fromCharCode(72)</code> turns 72 back into <code>"H"</code>.</p>
+<p>Write <code>encode(text)</code> which turns text into an array of numbers, and
+<code>decode(codes)</code> which turns numbers back into text. Press
+<strong>Run</strong> to experiment, <strong>Check</strong> when you think it works.</p>`,
+        starterCode: `// Every character is secretly a number. Translate both ways.
+
+function encode(text) {
+  // TODO: return an array with the character code of each character.
+  // text.charCodeAt(i) gives you the code at position i.
+  // A loop from 0 to text.length - 1 will visit every position.
+  return [];
+}
+
+function decode(codes) {
+  // TODO: return the text those codes spell.
+  // String.fromCharCode(72) === "H"
+  return "";
+}
+
+// Experiment freely — Run shows anything you log:
+console.log(encode("Hi"));
+console.log(decode([72, 105]));
+`,
+        hint: "Build encode() with a loop that pushes text.charCodeAt(i) into an array. For decode(), loop over the codes and add String.fromCharCode(code) onto a result string.",
+        tests: [
+          {
+            name: "encode(\"Hi\") → [72, 105]",
+            code: `assertEqual(encode("Hi"), [72, 105]);`,
+            hint: "charCodeAt(i) needs the position i, not the character itself.",
+          },
+          {
+            name: "decode([72, 105]) → \"Hi\"",
+            code: `assertEqual(decode([72, 105]), "Hi");`,
+            hint: "Start with an empty string and += each decoded character.",
+          },
+          {
+            name: "decode(encode(x)) gives x back — a perfect round trip",
+            code: `assertEqual(decode(encode("computers are just switches")), "computers are just switches");`,
+            hint: "If encode and decode each work alone, this passes automatically.",
+          },
+        ],
+      },
+    },
+
+    /* ----------------------------------------------------------------- */
+    {
+      id: "l2",
+      title: "A program is a list of instructions",
+      minutes: 15,
+      content: `
+<p>A <strong>program</strong> is nothing more than a list of instructions, executed
+one at a time, in order, by a machine that never gets bored and never improvises.
+The processor does roughly four things, billions of times per second:</p>
+<ol>
+  <li><strong>Fetch</strong> the next instruction from memory.</li>
+  <li><strong>Decode</strong> it (which operation? which data?).</li>
+  <li><strong>Execute</strong> it (add, compare, copy, jump…).</li>
+  <li>Repeat.</li>
+</ol>
+
+<h2>Memory is a giant numbered shelf</h2>
+<p>RAM is best pictured as a huge row of numbered boxes, each holding one byte.
+A "variable" in any language is ultimately a <em>name you gave to a box</em> (or a
+group of boxes). When a program "remembers" your score, it wrote a number into a
+box; when it "forgets" on restart, the boxes were handed to someone else.</p>
+
+<h2>Instructions are dumber than you think</h2>
+<p>Real CPU instructions are tiny: <em>add these two numbers</em>, <em>copy this
+byte</em>, <em>if that number is zero, jump to instruction #94</em>. Every app you
+have ever used — games, browsers, AI models — is compiled down to millions of these
+tiny steps. Complexity comes from <strong>composition</strong>, not from any single
+clever instruction.</p>
+
+<h2>Languages are for humans</h2>
+<p>Nobody wants to write millions of tiny steps by hand, so we invented programming
+languages. A <strong>compiler</strong> translates your whole program into machine
+instructions ahead of time; an <strong>interpreter</strong> reads your program and
+performs it line by line, live. Python and JavaScript are (mostly) interpreted —
+which is why you can type a line and see it run instantly.</p>
+
+<div class="callout"><strong>First-principles habit:</strong> when code confuses
+you, play the computer. Take a pencil, draw the memory boxes, and execute the
+program one line at a time — no skipping, no guessing what it "probably" does. The
+computer has no "probably".</div>
+`,
+      challenge: {
+        title: "Be the machine",
+        language: "js",
+        prompt: `
+<p>The best way to understand "a program is a list of instructions" is to
+<em>build the machine that runs one</em>. Your machine has a single memory box
+called the <strong>accumulator</strong>, starting at 0. It understands three
+instructions, given as strings:</p>
+<ul>
+  <li><code>"ADD 5"</code> — add 5 to the accumulator</li>
+  <li><code>"SUB 2"</code> — subtract 2</li>
+  <li><code>"MUL 3"</code> — multiply by 3</li>
+</ul>
+<p>Implement <code>run(program)</code>: execute every instruction in order and
+return the final accumulator value. Congratulations — you're writing an
+<em>interpreter</em>, the same idea (minus a few decades of engineering) that runs
+Python.</p>`,
+        starterCode: `// A tiny interpreter: one memory box, three instructions.
+
+function run(program) {
+  let acc = 0; // the accumulator — our single memory box
+
+  for (const line of program) {
+    // "ADD 5" → op = "ADD", n = 5
+    const parts = line.split(" ");
+    const op = parts[0];
+    const n = Number(parts[1]);
+
+    // TODO: update acc based on op ("ADD", "SUB", or "MUL").
+    // An if/else chain is perfect here.
+  }
+
+  return acc;
+}
+
+// Watch your machine work:
+console.log(run(["ADD 5", "MUL 3"])); // should print 15
+`,
+        hint: "Inside the loop: if (op === \"ADD\") acc = acc + n; — then do the same pattern for SUB and MUL.",
+        tests: [
+          {
+            name: "run([\"ADD 5\", \"MUL 3\"]) → 15",
+            code: `assertEqual(run(["ADD 5", "MUL 3"]), 15);`,
+            hint: "Order matters: (0 + 5) first, then × 3.",
+          },
+          {
+            name: "run([\"ADD 10\", \"SUB 4\", \"MUL 2\"]) → 12",
+            code: `assertEqual(run(["ADD 10", "SUB 4", "MUL 2"]), 12);`,
+            hint: "Check your SUB branch — is it subtracting n from acc?",
+          },
+          {
+            name: "an empty program leaves memory untouched → 0",
+            code: `assertEqual(run([]), 0);`,
+            hint: "If the loop never runs, run() should return the starting value.",
+          },
+        ],
+      },
+    },
+
+    /* ----------------------------------------------------------------- */
+    {
+      id: "l3",
+      title: "The internet is envelopes, HTTP is a letter format",
+      minutes: 15,
+      content: `
+<p>The internet is not a cloud. It's a lot of computers agreeing on how to pass
+<strong>small envelopes of data (packets)</strong> to each other, plus a few
+directory services so envelopes find their destination.</p>
+
+<h2>The journey of "loading a page"</h2>
+<ol>
+  <li><strong>DNS:</strong> your computer asks a directory service, "what's the
+      numeric address for <code>example.com</code>?" and gets back an IP address
+      like <code>93.184.216.34</code>. DNS is a phone book, nothing more.</li>
+  <li><strong>TCP:</strong> your computer opens a reliable two-way conversation
+      with that address. Packets can arrive late, broken, or not at all — TCP
+      numbers them, confirms receipt, and re-sends losses so both sides can
+      pretend the connection is a clean pipe.</li>
+  <li><strong>HTTP:</strong> over that pipe, your browser sends a
+      <em>plain text letter</em> asking for the page.</li>
+</ol>
+
+<h2>An HTTP request, unmasked</h2>
+<p>This is the actual text your browser sends. No magic, just a strict format:</p>
+<pre><code>GET /notes/7 HTTP/1.1
+Host: api.example.com
+Accept: application/json
+</code></pre>
+<ul>
+  <li>Line 1: the <strong>method</strong> (<code>GET</code> = "give me",
+      <code>POST</code> = "here's something new"), the <strong>path</strong>, and
+      the protocol version.</li>
+  <li>Then <strong>headers</strong> — one <code>Name: value</code> per line —
+      metadata about the request.</li>
+  <li>A blank line means "letter finished". (For POST, the data follows here.)</li>
+</ul>
+<p>The server replies in the same letter format: a status line
+(<code>200 OK</code>, <code>404 Not Found</code>), headers, blank line, then the
+content. Your browser reads that content — HTML — and draws it. <em>Every</em> API
+call you'll ever make, including calls to AI models, is exactly this letter
+exchange.</p>
+
+<div class="callout"><strong>First-principles habit:</strong> "the server is down",
+"the wifi is broken", "the API rejected me" are three different failures at three
+different layers (DNS/TCP/HTTP). Engineers debug networks by asking
+<em>which layer</em> broke — you now know enough to ask that question.</div>
+`,
+      challenge: {
+        title: "Read the letter",
+        language: "js",
+        prompt: `
+<p>Below, <code>raw</code> is a real HTTP request as one string —
+lines separated by <code>\\r\\n</code>, ending with a blank line.
+Implement <code>parseRequest(raw)</code> returning an object:</p>
+<pre><code>{
+  method: "GET",
+  path: "/notes/7",
+  headers: { "Host": "api.example.com", "Accept": "application/json" }
+}</code></pre>
+<p>Parsers like this sit inside every web server ever written.</p>`,
+        starterCode: `// Turn a raw HTTP request string into structured data.
+
+function parseRequest(raw) {
+  // Split the letter into lines. "\\r\\n" separates them.
+  const lines = raw.split("\\r\\n");
+
+  // Line 0 looks like: "GET /notes/7 HTTP/1.1"
+  // TODO: split it on spaces to get the method and path.
+
+  // Every following line until the first empty line is a header:
+  // "Host: api.example.com"  →  headers["Host"] = "api.example.com"
+  // TODO: loop from line 1, stop at the empty line, split each
+  // header on the FIRST ": " only.
+  const headers = {};
+
+  return { method: "???", path: "???", headers: headers };
+}
+
+// Try it:
+const raw = "GET /notes/7 HTTP/1.1\\r\\nHost: api.example.com\\r\\nAccept: application/json\\r\\n\\r\\n";
+console.log(parseRequest(raw));
+`,
+        hint: "For the first line: lines[0].split(\" \") gives [method, path, version]. For headers: line.indexOf(\": \") finds the split point; slice before it = name, slice after it = value. Stop looping when you hit an empty line.",
+        tests: [
+          {
+            name: "parses the method and path from the request line",
+            code: `
+const r = parseRequest("GET /notes/7 HTTP/1.1\\r\\nHost: api.example.com\\r\\n\\r\\n");
+assertEqual(r.method, "GET");
+assertEqual(r.path, "/notes/7");`,
+            hint: "The request line parts are separated by single spaces: method, path, version.",
+          },
+          {
+            name: "collects headers into an object",
+            code: `
+const r = parseRequest("GET /notes/7 HTTP/1.1\\r\\nHost: api.example.com\\r\\nAccept: application/json\\r\\n\\r\\n");
+assertEqual(r.headers["Host"], "api.example.com");
+assertEqual(r.headers["Accept"], "application/json");`,
+            hint: "Split each header line at the first \": \" — the value may itself contain colons.",
+          },
+          {
+            name: "handles a different method and header set",
+            code: `
+const r = parseRequest("POST /login HTTP/1.1\\r\\nContent-Type: application/json\\r\\n\\r\\n");
+assertEqual(r.method, "POST");
+assertEqual(r.path, "/login");
+assertEqual(r.headers["Content-Type"], "application/json");`,
+            hint: "Don't hard-code names — parse whatever headers appear until the blank line.",
+          },
+        ],
+      },
+    },
+  ],
+
+  project: {
+    id: "m1",
+    title: "Explain It Like an Engineer",
+    brief: `
+<p>Engineers are people who can <em>explain the machine</em>. This project has no
+code — it tests whether the magic is actually gone. Do each item for real (out
+loud, on paper), then tick it off. Be honest: the checklist is for you.</p>`,
+    checklist: [
+      { id: "c1", text: "Explain to another person (or a rubber duck, out loud) everything that happens between typing a URL and seeing a page — DNS, TCP, HTTP, HTML. No step may be \"and then magic\"." },
+      { id: "c2", text: "Pick one device you own and write its abstraction tower: switches → … → the app you use. At least six layers." },
+      { id: "c3", text: "Explain why \"the cloud is just other people's computers\" is both true and missing something important." },
+      { id: "c4", text: "Take any file on your device (photo, song, note) and explain what it physically is, all the way down to bits." },
+      { id: "c5", text: "Write down one thing about computers you used daily but couldn't explain a week ago — and explain it now in five sentences." },
+    ],
+  },
+};
+
+/* ================= js/data/module2.js ================= */
+/**
+ * Module 2 — Thinking Like an Engineer.
+ * Decomposition, scientific debugging, reading docs, asking good questions.
+ * Schema is documented in module1.js and README.md.
+ */
+
+const module2 = {
+  id: "m2",
+  number: 2,
+  title: "Thinking Like an Engineer",
+  tagline: "Decompose problems, debug like a scientist, read the docs, and reason about tradeoffs.",
+  status: "ready",
+
+  lessons: [
+    /* ----------------------------------------------------------------- */
+    {
+      id: "l1",
+      title: "Decomposition: eat the elephant",
+      minutes: 12,
+      content: `
+<p>Every problem that feels impossible is really a <em>pile</em> of problems that
+are each easy. The core engineering move — the one you'll use daily for the rest
+of your career — is <strong>decomposition</strong>: splitting a big fuzzy problem
+into small, sharply-defined pieces.</p>
+
+<h2>What a good piece looks like</h2>
+<p>A well-cut piece has three properties:</p>
+<ul>
+  <li><strong>One job.</strong> You can describe it in one sentence without "and".</li>
+  <li><strong>Clear inputs and outputs.</strong> You know exactly what goes in and
+      what must come out — which means you can test it alone.</li>
+  <li><strong>Ignorable insides.</strong> Once it works, you can forget how and just
+      use it. (Sound familiar? This is the abstraction idea from Module 1, applied
+      to your own code.)</li>
+</ul>
+
+<h2>Example: "build a checkout"</h2>
+<p>"Build a checkout" is paralyzing. But watch it dissolve:</p>
+<pre><code>total(cart, discountCode, taxRate)
+├── subtotal(items)            → sum of price × quantity
+├── applyDiscount(amount, code) → amount after discount rules
+└── addTax(amount, rate)        → amount with tax, rounded to cents</code></pre>
+<p>Each leaf is a function a beginner can write in five minutes. The "hard" problem
+was never hard — it was just <em>uncut</em>.</p>
+
+<h2>How to practice it</h2>
+<ol>
+  <li>Write the big goal as one sentence.</li>
+  <li>List the 3–6 sub-steps as verbs ("compute…", "check…", "format…").</li>
+  <li>If any step still scares you, cut <em>that one</em> again.</li>
+  <li>Solve the leaves. Compose them. Done.</li>
+</ol>
+
+<div class="callout"><strong>Engineer's habit:</strong> when you're stuck, you're
+almost never missing intelligence — you're missing a smaller problem. Don't think
+harder, cut smaller.</div>
+`,
+      challenge: {
+        title: "Cut the checkout",
+        language: "js",
+        prompt: `
+<p>Implement the decomposition from the lesson. The big function
+<code>total()</code> is <em>already written</em> — it just composes three small
+functions. Your job is the leaves:</p>
+<ul>
+  <li><code>subtotal(items)</code> — sum of <code>price × qty</code> for each item.</li>
+  <li><code>applyDiscount(amount, code)</code> — if code is <code>"SAVE10"</code>,
+      take 10% off; any other code changes nothing.</li>
+  <li><code>addTax(amount, rate)</code> — add tax (rate 0.08 = 8%) and round to
+      cents.</li>
+</ul>
+<p>Notice how each piece is testable alone — the Check button does exactly that.</p>`,
+        starterCode: `// The composition is done. Write the three small pieces.
+
+function subtotal(items) {
+  // items looks like: [{ price: 10, qty: 2 }, { price: 5, qty: 1 }]
+  // TODO: add up price * qty for every item.
+  return 0;
+}
+
+function applyDiscount(amount, code) {
+  // TODO: "SAVE10" means 10% off. Any other code: return amount unchanged.
+  return amount;
+}
+
+function addTax(amount, rate) {
+  // TODO: add the tax, then round to cents.
+  // Rounding trick: Math.round(x * 100) / 100
+  return amount;
+}
+
+// Already done — decomposition means this line is trivial:
+function total(items, code, rate) {
+  return addTax(applyDiscount(subtotal(items), code), rate);
+}
+
+console.log(total([{ price: 10, qty: 2 }, { price: 5, qty: 1 }], "SAVE10", 0.08));
+`,
+        hint: "subtotal: loop and accumulate item.price * item.qty. applyDiscount: if (code === \"SAVE10\") return amount * 0.9. addTax: Math.round(amount * (1 + rate) * 100) / 100.",
+        tests: [
+          {
+            name: "subtotal adds price × qty for every item",
+            code: `assertEqual(subtotal([{ price: 10, qty: 2 }, { price: 5, qty: 1 }]), 25);`,
+            hint: "Multiply before you add: each item contributes price * qty.",
+          },
+          {
+            name: "applyDiscount knows SAVE10 and ignores unknown codes",
+            code: `
+assertEqual(applyDiscount(100, "SAVE10"), 90);
+assertEqual(applyDiscount(100, "NICETRY"), 100);`,
+            hint: "Only \"SAVE10\" gets the 10% discount — everything else passes through.",
+          },
+          {
+            name: "addTax adds the rate and rounds to cents",
+            code: `
+assertEqual(addTax(100, 0.1), 110);
+assertEqual(addTax(22.5, 0.08), 24.3);`,
+            hint: "amount * (1 + rate), then Math.round(x * 100) / 100 to avoid floating-point crumbs.",
+          },
+          {
+            name: "the composed total() works end-to-end",
+            code: `assertEqual(total([{ price: 10, qty: 2 }, { price: 5, qty: 1 }], "SAVE10", 0.08), 24.3);`,
+            hint: "If the three leaves pass, this passes for free. That's the point of decomposition.",
+          },
+        ],
+      },
+    },
+
+    /* ----------------------------------------------------------------- */
+    {
+      id: "l2",
+      title: "Debugging is the scientific method",
+      minutes: 15,
+      content: `
+<p>Beginners debug by <em>staring</em> and <em>hoping</em>. Engineers debug the way
+scientists work: with a loop of hypothesis and experiment. The difference in speed
+is 10×, and it's a learnable procedure, not a talent.</p>
+
+<h2>The loop</h2>
+<ol>
+  <li><strong>Observe.</strong> What exactly happens, versus what you expected?
+      Write both down. "It's broken" is not an observation;
+      "median([10, 2, 33]) returns 2, expected 10" is.</li>
+  <li><strong>Hypothesize.</strong> One specific, falsifiable guess:
+      "the sort is putting 10 before 2 because it's comparing strings."</li>
+  <li><strong>Experiment.</strong> The cheapest test that could prove the guess
+      wrong — usually a <code>console.log</code> of an intermediate value.</li>
+  <li><strong>Conclude and repeat.</strong> Confirmed → fix it. Refuted → your model
+      of the code was wrong somewhere; that's <em>information</em>, not failure.</li>
+</ol>
+
+<h2>Rules that keep you honest</h2>
+<ul>
+  <li><strong>One change at a time.</strong> Change two things and you learn nothing
+      from the result.</li>
+  <li><strong>Read the error message. All of it. Twice.</strong> Error messages name
+      the file, line, and crime. Beginners skip them; engineers mine them.</li>
+  <li><strong>Explain the code out loud</strong> line by line — to a colleague, or
+      famously, to a rubber duck. The bug is usually in the line where your
+      explanation says "and this obviously…" — <em>obviously</em> is where
+      assumptions hide.</li>
+  <li><strong>The bug is in your code.</strong> Not the language, not the browser.
+      (When it truly isn't — rare — you'll find out via the same loop.)</li>
+</ul>
+
+<div class="callout"><strong>Engineer's habit:</strong> before touching the code,
+say your hypothesis out loud. If you can't state one, you're not debugging yet —
+you're gambling.</div>
+`,
+      challenge: {
+        title: "The broken median",
+        language: "js",
+        prompt: `
+<p>This <code>median()</code> has <strong>two planted bugs</strong>. Some checks
+already pass — which is exactly why sneaky bugs survive in real code.</p>
+<p>Do <em>not</em> rewrite it from scratch. Run it, observe, form a hypothesis
+about each failure, test with <code>console.log</code>, and make the smallest fix
+that works. (Fun fact: bug #1 has shipped to production at real companies more
+than once.)</p>`,
+        starterCode: `// median([1, 3, 2]) should be 2.
+// median([4, 1, 2, 3]) should be 2.5 (average of the middle two).
+// Two bugs are hiding below. Hypothesize → experiment → fix.
+
+function median(numbers) {
+  const sorted = numbers.slice().sort();
+
+  const mid = Math.floor(sorted.length / 2);
+
+  if (sorted.length % 2 === 1) {
+    return sorted[mid];
+  }
+  return (sorted[mid] + sorted[mid + 1]) / 2;
+}
+
+// Experiments go here — what does sorted actually contain?
+console.log(median([10, 2, 33]));
+`,
+        hint: "Experiment #1: console.log([10, 2, 33].slice().sort()) — is that the order you expected? JavaScript's default sort compares STRINGS. Experiment #2: for [1,2,3,4], which two positions are \"the middle two\"? Count indexes on your fingers.",
+        tests: [
+          {
+            name: "odd count, small numbers (this one passed even with the bugs)",
+            code: `assertEqual(median([1, 3, 2]), 2);`,
+            hint: "If this fails now, your fix broke something that worked — undo and re-hypothesize.",
+          },
+          {
+            name: "odd count with 10 and 33 — exposes bug #1",
+            code: `assertEqual(median([10, 2, 33]), 10);`,
+            hint: "sort() compares strings: \"10\" < \"2\". Give it a comparator: .sort((a, b) => a - b)",
+          },
+          {
+            name: "even count — exposes bug #2",
+            code: `assertEqual(median([4, 1, 2, 3]), 2.5);`,
+            hint: "For length 4, mid is 2 — but the middle two elements are at indexes 1 and 2, i.e. mid - 1 and mid.",
+          },
+          {
+            name: "a single number is its own median",
+            code: `assertEqual(median([5]), 5);`,
+            hint: "This should work once the other bugs are fixed — no special case needed.",
+          },
+        ],
+      },
+    },
+
+    /* ----------------------------------------------------------------- */
+    {
+      id: "l3",
+      title: "Read the docs, ask good questions",
+      minutes: 12,
+      content: `
+<p>The highest-leverage skill nobody teaches: <strong>reading documentation
+precisely</strong>. Docs are contracts. Every word is load-bearing — "returns a
+<em>new</em> array" vs "modifies the array" is the difference between working code
+and a haunted bug hunt.</p>
+
+<h2>How engineers read docs</h2>
+<ul>
+  <li><strong>Signature first.</strong> What goes in (types, order, which arguments
+      are optional), what comes out.</li>
+  <li><strong>Edge cases second.</strong> What happens with empty input? Negative
+      numbers? The docs usually say — in one easily-skimmed-past sentence.</li>
+  <li><strong>Examples last.</strong> Examples show the happy path; the prose holds
+      the truth. Never code from examples alone.</li>
+</ul>
+<p>This transfers directly to the AI era: an API reference, a library README, and a
+model card are all read the same way. So is a spec you hand to an AI assistant —
+writing precise docs and reading them are the same muscle.</p>
+
+<h2>Asking good questions</h2>
+<p>When docs and debugging both fail, engineers ask — but a good question is
+engineered too:</p>
+<ol>
+  <li><strong>What you're trying to do</strong> (the goal, not your attempted solution —
+      avoids the <a href="https://en.wikipedia.org/wiki/XY_problem">XY problem</a>).</li>
+  <li><strong>The smallest snippet that reproduces the problem.</strong> Making
+      this "minimal repro" solves it yourself half the time.</li>
+  <li><strong>What you observed vs. expected</strong>, exact error text included.</li>
+  <li><strong>What you already tried.</strong></li>
+</ol>
+<p>This exact format is also how you get great output from an AI assistant. A vague
+question gets a vague answer from humans and models alike.</p>
+
+<div class="callout"><strong>Engineer's habit:</strong> before asking anyone
+(human or AI), spend five minutes with the official docs of the thing that's
+failing. You'll arrive with a better question — or no question at all.</div>
+`,
+      challenge: {
+        title: "Implement from the spec",
+        language: "js",
+        prompt: `
+<p>Below is an API reference for a function that doesn't exist yet. Implement
+<code>money(cents)</code> so it satisfies <em>every sentence</em>. The tests probe
+the spec's edge cases — the ones a skimmer would miss.</p>
+<pre><code>money(cents) — API REFERENCE
+
+Formats an integer number of cents as a US dollar string.
+
+- cents: an integer. May be zero or negative.
+- Returns "$" + dollars + "." + cents, where:
+    · dollars are grouped with commas every three digits: 1234567 → "1,234,567"
+    · the cent part is ALWAYS exactly two digits, zero-padded
+- Negative amounts place the minus sign BEFORE the dollar sign:
+    money(-50) → "-$0.50"
+- money(0) → "$0.00"</code></pre>`,
+        starterCode: `// Read the reference like a contract. Every sentence is a test.
+
+function money(cents) {
+  // Suggested route (feel free to take your own):
+  // 1. Remember whether it's negative; work with Math.abs(cents).
+  // 2. Whole dollars: Math.floor(abs / 100). Leftover cents: abs % 100.
+  // 3. Commas: (1234567).toLocaleString("en-US") → "1,234,567"
+  // 4. Two-digit cents: String(c).padStart(2, "0")
+  // 5. Assemble, putting "-" before "$" when negative.
+  return "";
+}
+
+console.log(money(123456));  // expect "$1,234.56"
+console.log(money(-50));     // expect "-$0.50"
+`,
+        hint: "The three easy-to-miss clauses: cents are ALWAYS two digits (padStart), the minus goes BEFORE the $, and commas group the dollars. toLocaleString(\"en-US\") does the commas for you.",
+        tests: [
+          {
+            name: "money(123456) → \"$1,234.56\"",
+            code: `assertEqual(money(123456), "$1,234.56");`,
+            hint: "Dollars = floor(123456 / 100) = 1234, formatted with a comma; cents = 56.",
+          },
+          {
+            name: "cents are always two digits: money(5) → \"$0.05\"",
+            code: `assertEqual(money(5), "$0.05");`,
+            hint: "5 % 100 is 5 — pad it to \"05\" with padStart(2, \"0\").",
+          },
+          {
+            name: "negatives: money(-50) → \"-$0.50\" (minus BEFORE the $)",
+            code: `assertEqual(money(-50), "-$0.50");`,
+            hint: "Work with Math.abs(cents), then prepend \"-\" before the \"$\" at the end.",
+          },
+          {
+            name: "the zero case and big numbers from the spec",
+            code: `
+assertEqual(money(0), "$0.00");
+assertEqual(money(123456789), "$1,234,567.89");`,
+            hint: "Zero is not negative, so no minus sign. Commas must appear every three digits.",
+          },
+        ],
+      },
+    },
+  ],
+
+  project: {
+    id: "m2",
+    title: "The Bug Journal",
+    brief: `
+<p>For one week, treat every bug you meet (in code, or honestly in any device) as
+a lab experiment. Keep a journal — paper or a text file. This habit alone will put
+you ahead of most working programmers.</p>`,
+    checklist: [
+      { id: "c1", text: "Create your bug journal with a template: OBSERVED / EXPECTED / HYPOTHESIS / EXPERIMENT / RESULT." },
+      { id: "c2", text: "Log three real bugs through the full loop. At least one hypothesis must turn out wrong (if none did, your hypotheses weren't specific enough)." },
+      { id: "c3", text: "Write one \"good question\" post for a bug — goal, minimal repro, observed vs expected, what you tried — even if you never post it." },
+      { id: "c4", text: "Read one MDN page top to bottom (suggestion: Array.prototype.sort). Write down three things the examples alone would never have told you." },
+      { id: "c5", text: "Explain one bug out loud to a rubber duck (or patient friend) until you can name the exact line and reason it failed." },
+    ],
+  },
+};
+
+/* ================= js/data/module3.js ================= */
+/**
+ * Module 3 — Programming Fundamentals.
+ * Concept-first, language-second: the same ideas shown in JavaScript and Python.
+ * Lesson 4 runs Python in the browser via Pyodide (lazy-loaded from a CDN).
+ */
+
+const module3 = {
+  id: "m3",
+  number: 3,
+  title: "Programming Fundamentals",
+  tagline: "Variables, control flow, functions, and data structures — the same ideas in JavaScript and Python.",
+  status: "ready",
+
+  lessons: [
+    /* ----------------------------------------------------------------- */
+    {
+      id: "l1",
+      title: "Variables: names for boxes",
+      minutes: 12,
+      content: `
+<p>Module 1 showed that memory is numbered boxes. A <strong>variable</strong> is
+just a human-friendly <em>name</em> for a box. Everything else about variables is
+detail on top of that one idea.</p>
+
+<pre><code>// JavaScript                      # Python
+let price = 19.99;                 price = 19.99
+const NAME = "Ada";                NAME = "Ada"   # convention: caps = don't change
+price = 24.99; // rebind OK        price = 24.99</code></pre>
+
+<h2>Three ideas that unlock everything</h2>
+<ul>
+  <li><strong>Assignment is not math.</strong> <code>count = count + 1</code> is
+      nonsense as an equation but perfect as an <em>instruction</em>: "compute the
+      right side, then store it in the box named on the left."</li>
+  <li><strong>Expressions evaluate to values.</strong> <code>bill * 0.2</code>,
+      <code>name + "!"</code>, <code>items.length > 0</code> — each collapses to a
+      single value (a number, a string, a true/false). Programs are mostly
+      expressions being evaluated and stored.</li>
+  <li><strong>Types describe what's in the box.</strong> Numbers, strings
+      (text), booleans (true/false), and later: lists and objects. Operations mean
+      different things per type — <code>2 + 2</code> is 4 but
+      <code>"2" + "2"</code> is <code>"22"</code>. Half of all beginner bugs are
+      type confusions; now you know where to look.</li>
+</ul>
+
+<h2>State: variables over time</h2>
+<p>A running program is really a story of <em>state</em> — the contents of all its
+boxes — changing step by step. A game's score, your shopping cart, a chat history:
+all just variables being read and rewritten. When code confuses you, track the
+state on paper, line by line, like you did in Module 1.</p>
+
+<div class="callout"><strong>Concept over syntax:</strong> JavaScript writes
+<code>let</code>, Python writes nothing, other languages write types — but "name a
+box, store a value, read it later" is identical in every language you will ever
+learn.</div>
+`,
+      challenge: {
+        title: "The tip calculator",
+        language: "js",
+        prompt: `
+<p>Two small functions, built entirely from expressions and variables:</p>
+<ul>
+  <li><code>tipTotal(bill, pct)</code> — the bill plus <code>pct</code> percent
+      tip, rounded to cents.</li>
+  <li><code>splitBill(bill, pct, people)</code> — the tipped total divided
+      evenly, each share rounded to cents.</li>
+</ul>`,
+        starterCode: `function tipTotal(bill, pct) {
+  // TODO: bill plus pct percent of it. 50 with 20% → 60.
+  // pct is a number like 20, so the tip is bill * (pct / 100).
+  // Round to cents: Math.round(x * 100) / 100
+  return 0;
+}
+
+function splitBill(bill, pct, people) {
+  // TODO: the tipped total split evenly, rounded to cents.
+  // Reuse tipTotal — you already wrote it!
+  return 0;
+}
+
+console.log(tipTotal(50, 20));       // 60
+console.log(splitBill(100, 18, 4));  // 29.5
+`,
+        hint: "tipTotal: Math.round(bill * (1 + pct / 100) * 100) / 100. splitBill: call tipTotal, divide by people, round the same way.",
+        tests: [
+          {
+            name: "tipTotal(50, 20) → 60",
+            code: `assertEqual(tipTotal(50, 20), 60);`,
+            hint: "20% of 50 is 10, so the total is 60. Is pct being divided by 100?",
+          },
+          {
+            name: "tipTotal(19.99, 15) → 22.99 (rounded to cents)",
+            code: `assertEqual(tipTotal(19.99, 15), 22.99);`,
+            hint: "19.99 × 1.15 = 22.9885 — round with Math.round(x * 100) / 100.",
+          },
+          {
+            name: "splitBill(100, 18, 4) → 29.5",
+            code: `assertEqual(splitBill(100, 18, 4), 29.5);`,
+            hint: "Total with tip is 118; divided by 4 people that's 29.50 each.",
+          },
+        ],
+      },
+    },
+
+    /* ----------------------------------------------------------------- */
+    {
+      id: "l2",
+      title: "Control flow: decisions and repetition",
+      minutes: 15,
+      content: `
+<p>A program that only runs top-to-bottom is a calculator. Programs get interesting
+when they <strong>decide</strong> (branch) and <strong>repeat</strong> (loop). Every
+app you've ever used is decisions plus repetition plus state — nothing else.</p>
+
+<h2>Branching: if / else</h2>
+<pre><code>// JavaScript                          # Python
+if (score >= 90) {                     if score >= 90:
+  grade = "A";                             grade = "A"
+} else if (score >= 80) {              elif score >= 80:
+  grade = "B";                             grade = "B"
+} else {                               else:
+  grade = "C";                             grade = "C"</code></pre>
+<p>The machine evaluates the condition to <code>true</code> or <code>false</code>
+and jumps accordingly — literally the "if zero, jump to instruction #94" from
+Module 1, wearing nicer clothes.</p>
+
+<h2>Loops: don't repeat yourself, repeat the machine</h2>
+<pre><code>// JavaScript                          # Python
+for (const item of cart) {             for item in cart:
+  total += item.price;                     total += item.price</code></pre>
+<p>Reading a loop, always ask: <em>what changes each time around?</em> (the loop
+variable, the accumulator) and <em>what makes it stop?</em> A loop whose stop
+condition can never become true runs forever — you've now heard of the infinite
+loop before meeting one in the wild.</p>
+
+<h2>Combining them is the whole game</h2>
+<p>Filter = loop + if. Search = loop + if + early exit. Validation = a chain of
+ifs producing one verdict. You'll now write a validator — the same shape as code
+that guards every signup form on the internet.</p>
+
+<div class="callout"><strong>Concept over syntax:</strong> braces vs indentation is
+cosmetics. "Evaluate a condition, choose a path; repeat a block while a condition
+holds" is the substance, identical everywhere.</div>
+`,
+      challenge: {
+        title: "The password bouncer",
+        language: "js",
+        prompt: `
+<p>Implement <code>passwordStrength(pw)</code> returning exactly
+<code>"weak"</code>, <code>"ok"</code>, or <code>"strong"</code>:</p>
+<ul>
+  <li><code>"weak"</code> — fewer than 8 characters.</li>
+  <li><code>"strong"</code> — at least 12 characters <em>and</em> contains at
+      least one digit <em>and</em> at least one non-letter-non-digit symbol.</li>
+  <li><code>"ok"</code> — everything in between.</li>
+</ul>
+<p>Helpers are provided — read them; they're loops + ifs, the whole lesson in
+miniature.</p>`,
+        starterCode: `// Provided helpers — read them, they ARE the lesson:
+function hasDigit(s) {
+  for (const ch of s) {
+    if (ch >= "0" && ch <= "9") return true; // found one → exit early
+  }
+  return false; // the loop finished without finding any
+}
+
+function hasSymbol(s) {
+  for (const ch of s) {
+    const letter = (ch >= "a" && ch <= "z") || (ch >= "A" && ch <= "Z");
+    const digit = ch >= "0" && ch <= "9";
+    if (!letter && !digit) return true;
+  }
+  return false;
+}
+
+function passwordStrength(pw) {
+  // TODO: return "weak", "ok", or "strong" per the rules.
+  // Tip: handle "weak" first, then "strong", then everything else is "ok".
+  return "?";
+}
+
+console.log(passwordStrength("cat"));                      // weak
+console.log(passwordStrength("correct-horse-battery-9"));  // strong
+`,
+        hint: "Order matters: if (pw.length < 8) return \"weak\"; then if (pw.length >= 12 && hasDigit(pw) && hasSymbol(pw)) return \"strong\"; otherwise return \"ok\".",
+        tests: [
+          {
+            name: "short passwords are weak",
+            code: `
+assertEqual(passwordStrength("cat"), "weak");
+assertEqual(passwordStrength("1234567"), "weak");`,
+            hint: "Fewer than 8 characters is weak no matter what's in it.",
+          },
+          {
+            name: "medium passwords are ok",
+            code: `
+assertEqual(passwordStrength("longpassword"), "ok");
+assertEqual(passwordStrength("birthday1"), "ok");`,
+            hint: "\"longpassword\" is 12 chars but has no digit or symbol — it can't be strong.",
+          },
+          {
+            name: "long + digit + symbol = strong",
+            code: `assertEqual(passwordStrength("correct-horse-battery-9"), "strong");`,
+            hint: "All three conditions must hold together — that's one if with two &&s.",
+          },
+          {
+            name: "10 chars with digit and symbol is still only ok",
+            code: `assertEqual(passwordStrength("abcdefg1!x"), "ok");`,
+            hint: "Strong requires length at least 12 — this one is 10.",
+          },
+        ],
+      },
+    },
+
+    /* ----------------------------------------------------------------- */
+    {
+      id: "l3",
+      title: "Functions and data structures",
+      minutes: 18,
+      content: `
+<p>You've been using functions since Module 1; now let's name what they really
+are, and meet the two data structures that carry 95% of all real-world data.</p>
+
+<h2>Functions are contracts</h2>
+<p>A function is a <em>named, reusable piece of your decomposition</em>: inputs in,
+output out, insides ignorable. When you wrote <code>subtotal()</code> in Module 2
+and then forgot how it worked — that was the point. Good functions let you
+<strong>think in bigger units</strong>.</p>
+
+<h2>Arrays / lists: ordered many</h2>
+<pre><code>// JavaScript                          # Python
+const scores = [90, 85, 77];           scores = [90, 85, 77]
+scores[0]        // 90                 scores[0]       # 90
+scores.length    // 3                  len(scores)     # 3
+scores.push(100)                       scores.append(100)</code></pre>
+
+<h2>Objects / dicts: labeled facts</h2>
+<pre><code>// JavaScript                          # Python
+const user = {                         user = {
+  name: "Ada",                             "name": "Ada",
+  plan: "free",                            "plan": "free",
+};                                     }
+user.plan        // "free"             user["plan"]    # "free"</code></pre>
+<p>Almost every payload on the internet — every API response, every AI model reply
+— is these two shapes nested: <em>lists of objects of lists of objects</em>. JSON,
+which you'll live in from Module 5 onward, is exactly this, written down.</p>
+
+<h2>The universal pattern: transform collections</h2>
+<p>An enormous fraction of all code is: <em>take a collection, walk it, build a
+summary or a new collection</em>. Total a cart. Count votes. Group sales by
+product. Master this one pattern (a loop + an accumulator object) and you can
+read half the world's code.</p>
+
+<div class="callout"><strong>Concept over syntax:</strong> JavaScript objects,
+Python dicts, Java maps — all the same idea: a box of labeled boxes. Data
+structures are how programs <em>shape</em> information; pick the shape that matches
+the question you'll ask.</div>
+`,
+      challenge: {
+        title: "Best seller",
+        language: "js",
+        prompt: `
+<p>You have a list of orders, each an object:
+<code>{ product: "tea", price: 3, qty: 2 }</code>. Implement:</p>
+<ul>
+  <li><code>revenueByProduct(orders)</code> — an object mapping each product name
+      to its total revenue (price × qty, summed across its orders).</li>
+  <li><code>topProduct(orders)</code> — the name of the product with the highest
+      total revenue.</li>
+</ul>
+<p>This "group and summarize" move is the single most common loop in commercial
+software — dashboards are made of it.</p>`,
+        starterCode: `function revenueByProduct(orders) {
+  const revenue = {}; // e.g. { tea: 21, scone: 12 }
+  for (const order of orders) {
+    // TODO: add order.price * order.qty to this product's total.
+    // If the product isn't in revenue yet, start it at 0 first:
+    //   if (!(order.product in revenue)) revenue[order.product] = 0;
+  }
+  return revenue;
+}
+
+function topProduct(orders) {
+  const revenue = revenueByProduct(orders); // reuse! decomposition again
+  // TODO: walk the revenue object and return the name with the largest total.
+  // for (const name in revenue) { ... } visits each key.
+  return "?";
+}
+
+const sample = [
+  { product: "tea", price: 3, qty: 5 },
+  { product: "scone", price: 4, qty: 3 },
+  { product: "tea", price: 3, qty: 2 },
+];
+console.log(revenueByProduct(sample)); // { tea: 21, scone: 12 }
+console.log(topProduct(sample));       // "tea"
+`,
+        hint: "revenueByProduct: initialize missing keys to 0, then revenue[order.product] += order.price * order.qty. topProduct: track bestName and bestTotal as you loop with for...in, updating both when you see a bigger total.",
+        tests: [
+          {
+            name: "revenueByProduct groups and sums correctly",
+            code: `
+const orders = [
+  { product: "tea", price: 3, qty: 5 },
+  { product: "scone", price: 4, qty: 3 },
+  { product: "tea", price: 3, qty: 2 },
+];
+assertEqual(revenueByProduct(orders), { tea: 21, scone: 12 });`,
+            hint: "tea appears twice: 3×5 + 3×2 = 21. Are you accumulating with += ?",
+          },
+          {
+            name: "topProduct finds the biggest earner",
+            code: `
+const orders = [
+  { product: "tea", price: 3, qty: 5 },
+  { product: "scone", price: 4, qty: 3 },
+  { product: "tea", price: 3, qty: 2 },
+];
+assertEqual(topProduct(orders), "tea");`,
+            hint: "Compare each product's total against the best seen so far; keep name and number in sync.",
+          },
+          {
+            name: "works when a different product wins",
+            code: `
+const orders = [
+  { product: "mug", price: 12, qty: 1 },
+  { product: "tea", price: 3, qty: 2 },
+];
+assertEqual(topProduct(orders), "mug");`,
+            hint: "Don't hard-code an answer — let the loop decide.",
+          },
+        ],
+      },
+    },
+
+    /* ----------------------------------------------------------------- */
+    {
+      id: "l4",
+      title: "Same ideas, new accent: Python",
+      minutes: 15,
+      content: `
+<p>Time to prove the "concept-first, language-second" promise. Below is the
+<em>exact</em> transform-a-collection pattern from last lesson, in Python. Read it
+— you already know what every line does:</p>
+<pre><code>def revenue_by_product(orders):
+    revenue = {}                        # a dict: Python's labeled boxes
+    for order in orders:                # loop over the list
+        name = order["product"]
+        if name not in revenue:         # branch
+            revenue[name] = 0
+        revenue[name] += order["price"] * order["qty"]
+    return revenue</code></pre>
+
+<h2>What actually differs</h2>
+<ul>
+  <li><strong>Indentation is the syntax.</strong> No braces — the indent level
+      <em>is</em> the block.</li>
+  <li><strong>snake_case</strong> instead of camelCase; <code>None</code> instead
+      of <code>null</code>; <code>True/False</code> capitalized.</li>
+  <li>Strings, lists, and dicts come with batteries:
+      <code>text.lower()</code>, <code>text.split()</code>,
+      <code>word.strip(".,!?")</code> do in one call what needed loops before.</li>
+</ul>
+<p>Notice how small that list is. You spent three modules learning
+<em>programming</em>; picking up a language is now a weekend, not a year. That
+ratio holds for every future language too.</p>
+
+<h2>Why Python matters for your path</h2>
+<p>Python owns data work and AI: the libraries you'll meet in the agents track
+(and nearly every ML tool on Earth) speak it natively. JavaScript owns the
+browser. A builder who speaks both can ship anything.</p>
+
+<div class="callout"><strong>Heads up:</strong> this challenge runs real Python
+<em>in your browser</em> via Pyodide (a Python interpreter compiled to
+WebAssembly). The first Run downloads it from a CDN (~10&nbsp;MB, one time) — the
+only part of this site that needs the network. No server checks your answer even
+here: the interpreter itself moved into the page.</div>
+`,
+      challenge: {
+        title: "Word count, in Python",
+        language: "python",
+        prompt: `
+<p>Implement <code>word_count(text)</code> returning a dict mapping each word to
+how many times it appears:</p>
+<ul>
+  <li>Lowercase everything (<code>"Go"</code> and <code>"go"</code> are the same word).</li>
+  <li>Split on whitespace (<code>text.split()</code> handles this, including
+      multiple spaces and newlines).</li>
+  <li>Strip <code>. , ! ?</code> from the ends of each word
+      (<code>word.strip(".,!?")</code>).</li>
+  <li>Skip anything that ends up empty. Empty text → empty dict.</li>
+</ul>
+<p>This little function is a real building block: it's the first step of the
+"bag of words" idea behind search engines — and a cousin of tokenization, which
+you'll meet in the AI Agents track.</p>`,
+        starterCode: `def word_count(text):
+    counts = {}
+    # TODO:
+    # 1. Loop over text.lower().split()
+    # 2. word = word.strip(".,!?")
+    # 3. Skip empty strings (if not word: continue)
+    # 4. Count: counts[word] = counts.get(word, 0) + 1
+    return counts
+
+# Experiment (Run shows print output):
+print(word_count("the cat and the hat"))
+`,
+        hint: "counts.get(word, 0) returns the current count or 0 if the word is new — so counts[word] = counts.get(word, 0) + 1 handles both cases in one line.",
+        tests: [
+          {
+            name: "counts repeated words",
+            code: `assert word_count("the cat and the hat") == {"the": 2, "cat": 1, "and": 1, "hat": 1}, "word_count('the cat and the hat') should be {'the': 2, 'cat': 1, 'and': 1, 'hat': 1}, got " + repr(word_count("the cat and the hat"))`,
+            hint: "Lowercase first, then split, then count each word.",
+          },
+          {
+            name: "case and punctuation don't create new words",
+            code: `assert word_count("Go, go GO!") == {"go": 3}, "Expected {'go': 3}, got " + repr(word_count("Go, go GO!"))`,
+            hint: "lower() before splitting; strip \".,!?\" from each word after splitting.",
+          },
+          {
+            name: "empty text gives an empty dict",
+            code: `assert word_count("") == {}, "Expected {} for empty text, got " + repr(word_count(""))`,
+            hint: "\"\".split() is already [] — if your loop simply never runs, this passes.",
+          },
+        ],
+      },
+    },
+  ],
+
+  project: {
+    id: "m3",
+    title: "Tiny Tool",
+    brief: `
+<p>Build the smallest program that solves a <em>real</em> annoyance in your life —
+a unit converter you actually need, a decision picker, a text cleaner, a study
+timer. Plain HTML + JavaScript in one file (or a Python script) — no frameworks,
+no tutorial-following. The point is the full cycle: your problem → your
+decomposition → your working tool.</p>`,
+    checklist: [
+      { id: "c1", text: "Wrote down the problem in one sentence, and the input → output contract before any code." },
+      { id: "c2", text: "Decomposed it into at least three small functions, each with one job." },
+      { id: "c3", text: "Built it with plain HTML + JS (one file, works by double-clicking it) or a Python script." },
+      { id: "c4", text: "It survives bad input (empty, nonsense, extreme values) without crashing — you tested those on purpose." },
+      { id: "c5", text: "You used it for its real purpose at least twice on different days." },
+      { id: "c6", text: "Debugged at least one bug using the Module 2 loop, and logged it in your bug journal." },
+    ],
+  },
+};
+
+/* ================= js/data/module7.js ================= */
+/**
+ * Module 7 — AI Agents (flagship track).
+ * First two lessons are fully built; the rest are stubs with clear titles so
+ * the roadmap shows where the track goes. Every lesson calls out the
+ * power / privacy / cost tradeoff explicitly.
+ */
+
+const module7 = {
+  id: "m7",
+  number: 7,
+  title: "AI Agents",
+  tagline: "Build agents on any LLM — cloud or local — optimizing for power, privacy, and cost.",
+  status: "ready",
+  flagship: true,
+
+  lessons: [
+    /* ----------------------------------------------------------------- */
+    {
+      id: "l1",
+      title: "LLM fundamentals: tokens, context, temperature",
+      minutes: 18,
+      content: `
+<p>Before building agents, you need an honest mental model of the engine. An
+<strong>LLM</strong> (large language model) is a next-token predictor: given a
+sequence of tokens, it outputs a probability for every possible next token, one
+is chosen, appended, and the process repeats. Everything impressive an LLM does
+emerges from that loop — and so does every limitation.</p>
+
+<h2>Tokens: the model's alphabet</h2>
+<p>Models don't see letters or words; they see <strong>tokens</strong> — chunks of
+roughly 3–4 English characters. "understanding" might be
+<code>under|stand|ing</code>. This matters practically because
+<em>everything is billed and bounded in tokens</em>: API pricing is per token,
+speed is tokens/second, and the context window is a token budget. A useful rule
+of thumb you'll implement in a minute: <strong>tokens ≈ characters / 4</strong>.</p>
+
+<h2>Context: the model's entire world</h2>
+<p>The <strong>context window</strong> is everything the model can see for one
+call: the system prompt, the conversation so far, any documents you pasted in.
+Outside the window, nothing exists. Two consequences define agent engineering:</p>
+<ul>
+  <li><strong>LLMs have no memory.</strong> A "conversation" is an illusion your
+      code maintains by re-sending the history every single call. When the history
+      outgrows the window, <em>your code</em> chooses what to drop — that choice is
+      an engineering decision, and it's this lesson's challenge.</li>
+  <li><strong>Quality degrades as the window fills.</strong> Bigger context ≠ better
+      answers; relevant context = better answers. (This insight becomes RAG in a
+      later lesson.)</li>
+</ul>
+
+<h2>The knobs you control</h2>
+<ul>
+  <li><strong>System prompt:</strong> standing instructions with special authority —
+      who the model is, the rules, the output format. In agents it carries the tool
+      manual too.</li>
+  <li><strong>Temperature:</strong> how the next token gets picked. Near 0: always
+      the most likely token — predictable, best for extraction and tool calls.
+      Higher (~1): more randomness — better for brainstorming, worse for
+      correctness. Agents mostly run cool.</li>
+  <li><strong>Structured output:</strong> asking for JSON matching a schema instead
+      of prose. This is the bridge from "chatbot" to "component you can build on" —
+      code can't parse vibes, it can parse JSON.</li>
+</ul>
+
+<div class="callout callout-tradeoff"><strong>Power / privacy / cost:</strong>
+context is the recurring bill. Every token you keep in the window costs money
+(cloud: per-token pricing on <em>every</em> call, since history is re-sent) or
+time (local: attention over a long context slows generation). Trimming context
+well is the cheapest optimization in all of agent engineering — which is why it's
+your first challenge.</div>
+`,
+      challenge: {
+        title: "The context window budget",
+        language: "js",
+        prompt: `
+<p>Your chat app re-sends history each call, and the model has a token budget.
+Implement two functions your future agents will actually need:</p>
+<ul>
+  <li><code>estimateTokens(text)</code> — the rule of thumb:
+      <code>ceil(characters / 4)</code>.</li>
+  <li><code>fitContext(messages, budget)</code> — <code>messages[0]</code> is the
+      system prompt and is <strong>always kept</strong>. Then keep as many of the
+      <strong>most recent</strong> messages as fit in the remaining budget,
+      walking backwards from the newest; <strong>stop at the first message that
+      doesn't fit</strong> (no skipping older-but-smaller ones — order and
+      contiguity matter in conversations). Return the kept messages in their
+      original order.</li>
+</ul>`,
+        starterCode: `// messages look like: { role: "user", content: "..." }
+
+function estimateTokens(text) {
+  // TODO: tokens ≈ characters / 4, rounded UP (Math.ceil).
+  return 0;
+}
+
+function fitContext(messages, budget) {
+  const system = messages[0]; // always kept
+  let used = estimateTokens(system.content);
+
+  const kept = [];
+  // TODO: walk BACKWARDS from the last message down to index 1.
+  //   - cost = estimateTokens(message.content)
+  //   - if used + cost <= budget: keep it (remember: you're walking backwards,
+  //     so kept.unshift(message) keeps the final order correct) and add to used.
+  //   - otherwise STOP the walk entirely (break) — no cherry-picking.
+
+  return [system, ...kept];
+}
+
+// Experiment:
+const msgs = [
+  { role: "system", content: "S".repeat(40) },   // 10 tokens
+  { role: "user", content: "a".repeat(40) },     // 10 tokens
+  { role: "assistant", content: "b".repeat(40) },// 10 tokens
+  { role: "user", content: "c".repeat(40) },     // 10 tokens
+];
+console.log(fitContext(msgs, 30).length); // 3 → system + the 2 newest
+`,
+        hint: "Loop: for (let i = messages.length - 1; i >= 1; i--). Inside: compute cost, and either unshift + add to used, or break. The 'break, don't skip' rule is what keeps conversations contiguous.",
+        tests: [
+          {
+            name: "estimateTokens rounds up: 9 chars → 3 tokens",
+            code: `
+assertEqual(estimateTokens("abcdefgh"), 2);
+assertEqual(estimateTokens("abcdefghi"), 3);
+assertEqual(estimateTokens(""), 0);`,
+            hint: "Math.ceil(text.length / 4).",
+          },
+          {
+            name: "keeps everything when it all fits",
+            code: `
+const msgs = [
+  { role: "system", content: "S".repeat(40) },
+  { role: "user", content: "a".repeat(40) },
+  { role: "assistant", content: "b".repeat(40) },
+  { role: "user", content: "c".repeat(40) },
+];
+assertEqual(fitContext(msgs, 40), msgs);`,
+            hint: "4 × 10 tokens = 40, exactly the budget — <= means it fits.",
+          },
+          {
+            name: "drops the OLDEST messages first, keeps original order",
+            code: `
+const sys = { role: "system", content: "S".repeat(40) };
+const m1 = { role: "user", content: "a".repeat(40) };
+const m2 = { role: "assistant", content: "b".repeat(40) };
+const m3 = { role: "user", content: "c".repeat(40) };
+assertEqual(fitContext([sys, m1, m2, m3], 30), [sys, m2, m3]);`,
+            hint: "Budget 30 − 10 (system) leaves 20: room for the two newest only. Are they in original order (m2 before m3)?",
+          },
+          {
+            name: "when nothing fits, the system prompt survives alone",
+            code: `
+const sys = { role: "system", content: "S".repeat(40) };
+const m1 = { role: "user", content: "a".repeat(40) };
+assertEqual(fitContext([sys, m1], 12), [sys]);`,
+            hint: "10 (system) + 10 (m1) = 20 > 12, so m1 doesn't fit — return just [system].",
+          },
+        ],
+      },
+    },
+
+    /* ----------------------------------------------------------------- */
+    {
+      id: "l2",
+      title: "The agent loop: reason → act → observe",
+      minutes: 20,
+      content: `
+<p>An LLM alone can only <em>talk</em>. An <strong>agent</strong> is an LLM given
+the ability to <em>act</em> — call a calculator, search files, hit an API — plus a
+loop that feeds the results back. That loop is disarmingly simple, and by the end
+of this lesson you'll have built it from scratch:</p>
+<pre><code>loop:
+  reply = llm(messages)                 # model REASONS about what to do
+  if reply is a final answer: return it
+  if reply is a tool call:
+      result = run_the_tool(reply)      # your code ACTS
+      messages += observation(result)   # model will OBSERVE next turn</code></pre>
+
+<h2>Why this works</h2>
+<p>The model never executes anything — it only ever emits text saying
+<em>"I want to call <code>calculator</code> with <code>6 × 7</code>"</em>
+(as structured output — lesson 1's JSON, earning its keep). <strong>Your code</strong>
+decides whether to honor the request, runs the real function, and appends the
+result to the conversation. Next iteration, the model sees the observation and
+either answers or asks for another tool. Reason → act → observe → repeat.</p>
+<p>Sit with how much falls out of this one pattern: "look it up" (a search tool),
+"do the math" (a calculator), "check the calendar", "read this file", "book the
+meeting" — the loop never changes, only the tool list grows. Every commercial
+agent product you've seen is this loop with better marketing.</p>
+
+<h2>Guardrails are part of the loop, not an add-on</h2>
+<ul>
+  <li><strong>Step limits.</strong> Models can loop forever (re-calling the same
+      tool, chasing their tail). A maximum step count is the seatbelt every real
+      agent wears — yours will wear one too.</li>
+  <li><strong>Tool allowlists.</strong> The model can only request tools you chose
+      to expose. An agent with a read-only toolbox <em>cannot</em> delete your
+      files, no matter how confused it gets. Capability design &gt; hoping the
+      model behaves.</li>
+  <li><strong>The human stays the decision-maker.</strong> Dangerous tools
+      (spending money, sending email) get a confirmation step. You'll see this in
+      every serious agent framework — and now you know it's not the framework
+      being annoying.</li>
+</ul>
+
+<div class="callout callout-tradeoff"><strong>Power / privacy / cost:</strong>
+where should the LLM run? <em>Cloud APIs</em> (Claude, GPT, Gemini) give maximum
+reasoning power with zero setup — but every message, document, and tool result
+leaves your machine, and you pay per token forever. <em>Local models</em> via
+<a href="https://ollama.com">Ollama</a> or llama.cpp run on your own hardware:
+complete privacy (nothing leaves the box — verify with wifi off), zero marginal
+cost, full control; the price is weaker reasoning and your RAM. The agent loop
+you're about to build is <em>identical</em> either way — swap the
+<code>llm</code> function, keep everything else. That's why we practice against a
+mock: the loop is the skill, the model is a plug.</div>
+`,
+      challenge: {
+        title: "Build the agent loop",
+        language: "js",
+        prompt: `
+<p>Implement <code>runAgent(llm, tools, question)</code> — a real, working agent
+loop. The pieces:</p>
+<ul>
+  <li><code>llm(messages)</code> returns either <code>{ answer: "..." }</code>
+      (done!) or <code>{ tool: "calculator", input: "6*7" }</code> (a tool
+      request, as structured output).</li>
+  <li><code>tools</code> is an object of functions:
+      <code>tools.calculator("6*7")</code> → <code>"42"</code>.</li>
+  <li>After running a tool, append the observation
+      <code>{ role: "tool", content: result }</code> to <code>messages</code> so
+      the model sees it next iteration.</li>
+  <li><strong>Guardrail:</strong> at most 5 steps; if there's still no final
+      answer, return exactly <code>"I got stuck."</code></li>
+</ul>
+<p>The tests run your loop against a scripted mock LLM — including one that
+tries to loop forever. Pass them and you have built, from nothing, the core of
+every agent product on the market.</p>`,
+        starterCode: `function runAgent(llm, tools, question) {
+  const messages = [
+    { role: "system", content: "Answer the question. You may request tools." },
+    { role: "user", content: question },
+  ];
+
+  for (let step = 0; step < 5; step++) {
+    const reply = llm(messages);
+
+    // TODO:
+    // 1. If reply.answer exists, the agent is done — return it.
+    // 2. Otherwise it's a tool request:
+    //      - find the function: tools[reply.tool]
+    //      - run it with reply.input
+    //      - push { role: "tool", content: result } onto messages
+    //    ...and let the loop come around again (observe → reason).
+  }
+
+  // The guardrail: 5 steps without an answer means we stop on purpose.
+  return "I got stuck.";
+}
+`,
+        hint: "Two cases inside the loop: if (reply.answer !== undefined) return reply.answer; else { const result = tools[reply.tool](reply.input); messages.push({ role: \"tool\", content: result }); }",
+        tests: [
+          {
+            name: "returns a direct answer when no tool is needed",
+            code: `
+const llm = (messages) => ({ answer: "Paris" });
+assertEqual(runAgent(llm, {}, "Capital of France?"), "Paris");`,
+            hint: "First check: does the reply have an .answer? Then return it immediately.",
+          },
+          {
+            name: "runs a tool and feeds the observation back to the model",
+            code: `
+let secondCallSaw = "";
+let call = 0;
+const script = [
+  { tool: "calculator", input: "6*7" },
+  { answer: "It is 42." },
+];
+const llm = (messages) => {
+  call++;
+  if (call === 2) {
+    secondCallSaw = messages.map((m) => m.role + ":" + m.content).join("|");
+  }
+  return script[call - 1];
+};
+const tools = { calculator: (input) => "42" };
+assertEqual(runAgent(llm, tools, "what is 6*7?"), "It is 42.");
+assert(secondCallSaw.indexOf("tool:42") !== -1,
+  "after running the tool, push { role: 'tool', content: result } onto messages so the LLM can observe it");`,
+            hint: "Call the tool with reply.input, then messages.push({ role: \"tool\", content: result }). The mock checks the observation actually arrived.",
+          },
+          {
+            name: "guardrail: a model that loops forever gets cut off",
+            code: `
+let toolRuns = 0;
+const llm = (messages) => ({ tool: "calculator", input: "1+1" });
+const tools = { calculator: (input) => { toolRuns++; return "2"; } };
+assertEqual(runAgent(llm, tools, "loop forever"), "I got stuck.");
+assert(toolRuns <= 5, "the loop must stop after at most 5 steps — got " + toolRuns + " tool runs");`,
+            hint: "Keep the for-loop bounded at 5 and return \"I got stuck.\" after it — never while(true).",
+          },
+        ],
+      },
+    },
+
+    /* ------------------ coming soon ------------------ */
+    { id: "l3", title: "RAG: give your agent your knowledge (local embeddings)", stub: true },
+    { id: "l4", title: "Memory, multi-step & multi-agent patterns", stub: true },
+    { id: "l5", title: "Guardrails, evals, and knowing when it's wrong", stub: true },
+  ],
+
+  project: {
+    id: "m7",
+    title: "Local Brain",
+    brief: `
+<p>Run an open-source LLM on your own hardware and <em>feel</em> the
+power/privacy/cost triangle instead of reading about it. Install
+<a href="https://ollama.com">Ollama</a> (free, open source, Mac/Windows/Linux),
+then work the checklist. Small models to try: <code>llama3.2:1b</code> (~1.3 GB)
+or <code>qwen2.5:3b</code>. No GPU required — patience counts as hardware.</p>`,
+    checklist: [
+      { id: "c1", text: "Installed Ollama and pulled a small open model (e.g. ollama pull llama3.2:1b)." },
+      { id: "c2", text: "Chatted with it — then turned wifi OFF and chatted again. Let it sink in: a thinking machine, fully on your hardware, nothing leaving the box." },
+      { id: "c3", text: "Asked the same 3 questions (one factual, one reasoning, one creative) to the small local model and to any hosted model. Wrote down where the gap is big vs. barely noticeable." },
+      { id: "c4", text: "Measured rough speed (tokens/sec is shown with: ollama run llama3.2:1b --verbose) and noted your machine's RAM usage while it ran." },
+      { id: "c5", text: "Wrote your own power/privacy/cost verdict: three real tasks where local wins, three where cloud is worth it." },
+    ],
+  },
+};
+
+/* ================= js/data/stubs.js ================= */
+/**
+ * Stub modules — real titles and lesson plans, content coming soon.
+ *
+ * To bring a stub to life:
+ *   1. Change status to "ready".
+ *   2. Replace each { stub: true } lesson with full { content, challenge } data
+ *      (copy the shape from module1.js — the schema is documented there and in
+ *      README.md).
+ *   3. Add a project with a checklist if it doesn't have one.
+ * Nothing else needs to change — the roadmap, unlocking, progress, and XP all
+ * adapt automatically.
+ */
+
+const module4 = {
+  id: "m4",
+  number: 4,
+  title: "Building with AI Tools",
+  tagline: "Pair-program with AI: precise prompts, real context, ruthless verification. You stay the decision-maker.",
+  status: "stub",
+  lessons: [
+    { id: "l1", title: "Prompting is specification writing", stub: true },
+    { id: "l2", title: "Context: what the AI can't guess", stub: true },
+    { id: "l3", title: "Verify everything: review AI code like a senior engineer", stub: true },
+    { id: "l4", title: "Learning 10× faster with an AI tutor (without lying to yourself)", stub: true },
+  ],
+  project: null,
+};
+
+const module5 = {
+  id: "m5",
+  number: 5,
+  title: "Building Real Applications",
+  tagline: "Frontend, backend, APIs, JSON, databases — and how a whole app hangs together.",
+  status: "stub",
+  lessons: [
+    { id: "l1", title: "The DOM and state: your first real frontend", stub: true },
+    { id: "l2", title: "Thinking in components", stub: true },
+    { id: "l3", title: "APIs, REST, and JSON: how programs talk", stub: true },
+    { id: "l4", title: "Databases from first principles", stub: true },
+    { id: "l5", title: "Anatomy of a full application", stub: true },
+  ],
+  project: null,
+};
+
+const module6 = {
+  id: "m6",
+  number: 6,
+  title: "Cloud & Deployment",
+  tagline: "Hosting, DNS, CI/CD, containers — ship things to the real internet on free tiers.",
+  status: "stub",
+  lessons: [
+    { id: "l1", title: "Hosting & DNS demystified", stub: true },
+    { id: "l2", title: "CI/CD: robots that ship for you", stub: true },
+    { id: "l3", title: "Containers: Docker from first principles", stub: true },
+    { id: "l4", title: "Environments, secrets, and not leaking your keys", stub: true },
+  ],
+  /* The lessons are coming soon, but the project is live — because the best
+     first deploy is this very site. */
+  project: {
+    id: "m6",
+    title: "Ship This Site",
+    brief: `
+<p>Deploy <strong>Zero to Builder itself</strong> to GitHub Pages, exactly as
+described in this repo's README. Your learning platform, live on the public
+internet, served from your own repository — that's a real deploy, and it makes
+everything after it less scary.</p>`,
+    checklist: [
+      { id: "c1", text: "Created a GitHub account and a repository for this site." },
+      { id: "c2", text: "Pushed the code (git add → commit → push) from your machine." },
+      { id: "c3", text: "Enabled GitHub Pages in the repo settings and waited for the green check." },
+      { id: "c4", text: "Opened the live URL on your phone — different device, different network." },
+      { id: "c5", text: "Changed something small (even a word), pushed again, and watched the change go live." },
+    ],
+  },
+};
+
+const module8 = {
+  id: "m8",
+  number: 8,
+  title: "Commercial-Ready Products",
+  tagline: "Auth, security, payments, monitoring, testing — the gap between a demo and something people pay for.",
+  status: "stub",
+  lessons: [
+    { id: "l1", title: "Auth & security basics: who are you, and can you prove it?", stub: true },
+    { id: "l2", title: "Payments without tears", stub: true },
+    { id: "l3", title: "Monitoring & logging: knowing it broke before your users do", stub: true },
+    { id: "l4", title: "Testing & performance: confidence at speed", stub: true },
+    { id: "l5", title: "Demo vs product: the last 20% that is 80% of the work", stub: true },
+  ],
+  project: null,
+};
+
+/* ================= js/data/curriculum.js ================= */
+/**
+ * curriculum.js — aggregates all module files and provides the progress
+ * helpers used by views and achievements.
+ *
+ * Adding a module = create js/data/moduleN.js and add it to MODULES below.
+ */
+
+
+
+
+
+
+
+const MODULES = [
+  module1,
+  module2,
+  module3,
+  module4,
+  module5,
+  module6,
+  module7,
+  module8,
+];
+
+/* ---------------- Lookups ---------------- */
+
+function getModule(moduleId) {
+  return MODULES.find((m) => m.id === moduleId) || null;
+}
+
+function getLesson(moduleId, lessonId) {
+  const mod = getModule(moduleId);
+  if (!mod) return null;
+  return mod.lessons.find((l) => l.id === lessonId) || null;
+}
+
+/** Progress for lessons AND their challenges is keyed by "m1-l2". */
+function lessonKey(moduleId, lessonId) {
+  return `${moduleId}-${lessonId}`;
+}
+
+/* ---------------- Progress helpers ---------------- */
+
+/** Lessons that actually have content (stub lessons don't count). */
+function readyLessons(mod) {
+  return mod.lessons.filter((l) => !l.stub);
+}
+
+/**
+ * A module is COMPLETE when it has real lessons and all of them are done,
+ * including passing each lesson's challenge. (Projects grant extra XP and
+ * achievements but don't gate progression — they take days, not minutes.)
+ */
+function isModuleComplete(moduleId) {
+  const mod = getModule(moduleId);
+  if (!mod) return false;
+  const lessons = readyLessons(mod);
+  if (lessons.length === 0) return false;
+  return lessons.every((l) => {
+    const key = lessonKey(mod.id, l.id);
+    if (!state.isLessonDone(key)) return false;
+    if (l.challenge && !state.isChallengePassed(key)) return false;
+    return true;
+  });
+}
+
+/**
+ * "Satisfied" is the unlock-gate version of complete: a stub module (nothing
+ * to do yet) never blocks the modules after it.
+ */
+function isModuleSatisfied(mod) {
+  if (readyLessons(mod).length === 0) return true;
+  return isModuleComplete(mod.id);
+}
+
+/**
+ * Module 1 is always unlocked; each later module unlocks when everything
+ * before it is satisfied. Free Roam mode (a real setting, because self-taught
+ * learners know their own path) unlocks everything.
+ */
+function isModuleUnlocked(moduleId) {
+  if (state.isFreeRoam()) return true;
+  const index = MODULES.findIndex((m) => m.id === moduleId);
+  if (index <= 0) return true;
+  return MODULES.slice(0, index).every(isModuleSatisfied);
+}
+
+/** { done, total, pct } across a module's lessons, challenges, and project. */
+function moduleProgress(mod) {
+  let done = 0;
+  let total = 0;
+  for (const l of readyLessons(mod)) {
+    const key = lessonKey(mod.id, l.id);
+    total += 1;
+    if (state.isLessonDone(key)) done += 1;
+    if (l.challenge) {
+      total += 1;
+      if (state.isChallengePassed(key)) done += 1;
+    }
+  }
+  if (mod.project) {
+    total += 1;
+    if (state.isProjectDone(mod.project.id)) done += 1;
+  }
+  return { done, total, pct: total === 0 ? 0 : Math.round((done / total) * 100) };
+}
+
+/* ================= js/runner.js ================= */
+/**
+ * runner.js — runs learner code and hidden tests, entirely in the browser.
+ *
+ * JavaScript: executed with `new Function` — the browser's own engine is the
+ * judge, no server involved. Each test re-runs the learner's code followed by
+ * one assertion snippet, so a single failing test can't poison the others.
+ *
+ * Python: executed by Pyodide (CPython compiled to WebAssembly), lazy-loaded
+ * from a CDN only when a Python challenge actually runs — the rest of the
+ * site never pays that cost.
+ */
+
+/* ---------------- assertion helpers (injected into JS tests) ---------------- */
+
+function assert(condition, message) {
+  if (!condition) throw new Error(message || "Assertion failed");
+}
+
+/** Deep-ish equality via JSON — plenty for numbers, strings, arrays, objects. */
+function assertEqual(actual, expected, message) {
+  const a = JSON.stringify(actual);
+  const e = JSON.stringify(expected);
+  if (a !== e) {
+    throw new Error(
+      (message ? message + " — " : "") + `expected ${e} but got ${a === undefined ? "undefined" : a}`
+    );
+  }
+}
+
+/** A console stand-in that records logs instead of (only) printing them. */
+function makeCapturingConsole(logs) {
+  const fmt = (args) =>
+    args
+      .map((v) => (typeof v === "string" ? v : JSON.stringify(v)))
+      .join(" ");
+  return {
+    log: (...args) => logs.push(fmt(args)),
+    error: (...args) => logs.push("ERROR: " + fmt(args)),
+    warn: (...args) => logs.push("WARN: " + fmt(args)),
+  };
+}
+
+/* ---------------- JavaScript ---------------- */
+
+/** Run learner code alone; return whatever it logged (for the Run button). */
+function runJS(code) {
+  const logs = [];
+  try {
+    const fn = new Function("console", "assert", "assertEqual", `"use strict";\n${code}`);
+    fn(makeCapturingConsole(logs), assert, assertEqual);
+    return { ok: true, logs };
+  } catch (err) {
+    return { ok: false, logs, error: String(err && err.message ? err.message : err) };
+  }
+}
+
+/** Run learner code + each hidden test; return per-test results (Check button). */
+function checkJS(code, tests) {
+  const results = [];
+  for (const test of tests) {
+    const logs = [];
+    try {
+      const fn = new Function(
+        "console",
+        "assert",
+        "assertEqual",
+        `"use strict";\n${code}\n;/* --- hidden test --- */\n${test.code}`
+      );
+      fn(makeCapturingConsole(logs), assert, assertEqual);
+      results.push({ name: test.name, ok: true });
+    } catch (err) {
+      results.push({
+        name: test.name,
+        ok: false,
+        message: String(err && err.message ? err.message : err),
+        hint: test.hint,
+      });
+    }
+  }
+  return { passed: results.every((r) => r.ok), results };
+}
+
+/* ---------------- Python (Pyodide, lazy) ---------------- */
+
+const PYODIDE_VERSION = "v0.26.4";
+const PYODIDE_BASE = `https://cdn.jsdelivr.net/pyodide/${PYODIDE_VERSION}/full/`;
+
+let pyodidePromise = null;
+
+/** Load Pyodide once, on first use. `onStatus` lets the UI show progress. */
+function getPyodide(onStatus) {
+  if (!pyodidePromise) {
+    onStatus?.("Downloading the Python runtime (~10 MB, first time only)…");
+    pyodidePromise = new Promise((resolve, reject) => {
+      const script = document.createElement("script");
+      script.src = PYODIDE_BASE + "pyodide.js";
+      script.onload = () => {
+        window
+          .loadPyodide({ indexURL: PYODIDE_BASE })
+          .then(resolve, reject);
+      };
+      script.onerror = () =>
+        reject(new Error("Could not load Pyodide. Python challenges need an internet connection (just this once — everything else on this site is offline-friendly)."));
+      document.head.appendChild(script);
+    }).catch((err) => {
+      pyodidePromise = null; // allow retrying after a network hiccup
+      throw err;
+    });
+  }
+  return pyodidePromise;
+}
+
+/** Trim Pyodide's long traceback down to the line a learner needs. */
+function pythonErrorMessage(err) {
+  const text = String(err && err.message ? err.message : err);
+  const lines = text.trim().split("\n");
+  // The last line of a Python traceback is "ErrorType: message" — the useful bit.
+  const last = lines[lines.length - 1] || text;
+  return last;
+}
+
+/** Run learner Python alone, capturing print() output (Run button). */
+async function runPython(code, onStatus) {
+  const logs = [];
+  try {
+    const pyodide = await getPyodide(onStatus);
+    onStatus?.("Running…");
+    pyodide.setStdout({ batched: (line) => logs.push(line) });
+    pyodide.setStderr({ batched: (line) => logs.push("ERROR: " + line) });
+    const namespace = pyodide.globals.get("dict")();
+    try {
+      await pyodide.runPythonAsync(code, { globals: namespace });
+    } finally {
+      namespace.destroy();
+    }
+    return { ok: true, logs };
+  } catch (err) {
+    return { ok: false, logs, error: pythonErrorMessage(err) };
+  }
+}
+
+/** Run learner Python + each test's assert snippet (Check button). */
+async function checkPython(code, tests, onStatus) {
+  let pyodide;
+  try {
+    pyodide = await getPyodide(onStatus);
+  } catch (err) {
+    // Couldn't even load the runtime — every test "fails" with the reason.
+    return {
+      passed: false,
+      results: tests.map((t) => ({ name: t.name, ok: false, message: String(err.message || err) })),
+    };
+  }
+
+  onStatus?.("Checking…");
+  pyodide.setStdout({ batched: () => {} }); // tests don't need learner prints
+  pyodide.setStderr({ batched: () => {} });
+
+  const results = [];
+  for (const test of tests) {
+    // A fresh namespace per test so tests can't contaminate each other.
+    const namespace = pyodide.globals.get("dict")();
+    try {
+      await pyodide.runPythonAsync(code + "\n\n# --- hidden test ---\n" + test.code, {
+        globals: namespace,
+      });
+      results.push({ name: test.name, ok: true });
+    } catch (err) {
+      results.push({
+        name: test.name,
+        ok: false,
+        message: pythonErrorMessage(err),
+        hint: test.hint,
+      });
+    } finally {
+      namespace.destroy();
+    }
+  }
+  return { passed: results.every((r) => r.ok), results };
+}
+
+/* ================= js/views.js ================= */
+/**
+ * views.js — renders every page into #app and wires up interactions.
+ *
+ * Each render function receives the <main id="app"> element. Content HTML
+ * comes from the curriculum files (authored, trusted); anything produced by
+ * learner code (console output, error text) is inserted with textContent so
+ * it can never inject markup.
+ */
+
+
+
+
+
+/* ------------------------------------------------------------------ */
+/* Achievements: after any progress event, re-evaluate every check.     */
+/* ------------------------------------------------------------------ */
+
+function checkAchievements() {
+  const snap = state.snapshot();
+  const ctx = {
+    completedLessons: snap.completedLessons,
+    passedChallenges: snap.passedChallenges,
+    completedProjects: snap.completedProjects,
+    modules: MODULES,
+    isModuleComplete,
+  };
+  for (const def of ACHIEVEMENTS) {
+    if (!state.hasAchievement(def.id) && def.check(ctx)) {
+      state.unlockAchievement(def);
+    }
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/* Home: hero + roadmap                                                 */
+/* ------------------------------------------------------------------ */
+
+function renderHome(app) {
+  const items = MODULES.map((mod) => {
+    const unlocked = isModuleUnlocked(mod.id);
+    const complete = isModuleComplete(mod.id);
+    const progress = moduleProgress(mod);
+    const stateClass = complete ? "done" : unlocked ? "unlocked" : "locked";
+    const node = complete ? "✓" : unlocked ? mod.number : "🔒";
+
+    const badges = [
+      mod.flagship ? `<span class="badge badge-flagship">★ Flagship</span>` : "",
+      mod.status === "stub" ? `<span class="badge badge-stub">Coming soon</span>` : "",
+      complete
+        ? `<span class="badge badge-done">Complete</span>`
+        : unlocked
+        ? `<span class="badge badge-unlocked">Unlocked</span>`
+        : `<span class="badge">Locked</span>`,
+    ].join("");
+
+    const card = `
+      <h3>Module ${mod.number}: ${mod.title}</h3>
+      <p>${mod.tagline}</p>
+      <div class="module-meta">
+        ${badges}
+        ${progress.total > 0 ? `<span>${progress.done}/${progress.total} steps</span>` : ""}
+      </div>
+      ${
+        progress.total > 0
+          ? `<div class="mini-progress"><div class="mini-progress-fill" style="width:${progress.pct}%"></div></div>`
+          : ""
+      }`;
+
+    // Locked modules render as a <div> (not a link) so keyboard users don't
+    // tab into dead ends; the lock state is explained on the card itself.
+    const cardEl = unlocked
+      ? `<a class="module-card" href="#/module/${mod.id}">${card}</a>`
+      : `<div class="module-card locked" aria-disabled="true">${card}</div>`;
+
+    return `
+      <li class="roadmap-item ${stateClass}">
+        <div class="roadmap-node" aria-hidden="true">${node}</div>
+        ${cardEl}
+      </li>`;
+  }).join("");
+
+  app.innerHTML = `
+    <section class="hero">
+      <h1>Zero to <span class="grad">Builder</span></h1>
+      <p>A first-principles path from "computers are magic" to shipping real
+         software and AI agents. No memorizing — understanding.</p>
+      <label class="free-roam">
+        <input type="checkbox" id="free-roam" ${state.isFreeRoam() ? "checked" : ""} />
+        Free Roam — unlock every module (you know your own path)
+      </label>
+    </section>
+    <ol class="roadmap" aria-label="Learning path">${items}</ol>
+  `;
+
+  app.querySelector("#free-roam").addEventListener("change", (e) => {
+    state.setFreeRoam(e.target.checked);
+    renderHome(app); // re-render so locks update instantly
+  });
+}
+
+/* ------------------------------------------------------------------ */
+/* Module page: lesson list + project                                   */
+/* ------------------------------------------------------------------ */
+
+function renderModule(app, moduleId) {
+  const mod = getModule(moduleId);
+  if (!mod) return renderNotFound(app);
+
+  if (!isModuleUnlocked(mod.id)) {
+    app.innerHTML = `
+      <p class="crumbs"><a href="#/">Path</a> / Module ${mod.number}</p>
+      <div class="page-head">
+        <h1>🔒 Module ${mod.number}: ${mod.title}</h1>
+        <p class="tagline">Finish the earlier modules to unlock this one — or
+        turn on <strong>Free Roam</strong> on the home page if you want to skip
+        ahead. Your path, your call.</p>
+      </div>
+      <a class="btn" href="#/">← Back to the path</a>`;
+    return;
+  }
+
+  const lessonRows = mod.lessons
+    .map((lesson) => {
+      if (lesson.stub) {
+        return `
+          <li><div class="item-row" style="opacity:.55">
+            <span class="item-icon" aria-hidden="true">🔜</span>
+            <div class="grow"><h4>${lesson.title}</h4>
+            <span class="sub">Coming soon</span></div>
+          </div></li>`;
+      }
+      const key = lessonKey(mod.id, lesson.id);
+      const lessonDone = state.isLessonDone(key);
+      const challengeDone = state.isChallengePassed(key);
+      const subBits = [
+        `${lesson.minutes} min read`,
+        lesson.challenge ? `challenge: ${challengeDone ? "passed ✓" : "not passed yet"}` : null,
+      ].filter(Boolean);
+      return `
+        <li><a class="item-row" href="#/lesson/${mod.id}/${lesson.id}">
+          <span class="item-icon" aria-hidden="true">📖</span>
+          <div class="grow">
+            <h4>${lesson.title}</h4>
+            <span class="sub">${subBits.join(" · ")}</span>
+          </div>
+          ${lessonDone ? `<span class="check" aria-label="Lesson complete">✓</span>` : ""}
+        </a></li>`;
+    })
+    .join("");
+
+  const projectRow = mod.project
+    ? `
+      <h2>Build project</h2>
+      <ul class="item-list">
+        <li><a class="item-row" href="#/project/${mod.id}">
+          <span class="item-icon" aria-hidden="true">🛠️</span>
+          <div class="grow">
+            <h4>${mod.project.title}</h4>
+            <span class="sub">Project brief + self-assessment checklist</span>
+          </div>
+          ${state.isProjectDone(mod.project.id) ? `<span class="check" aria-label="Project complete">✓</span>` : ""}
+        </a></li>
+      </ul>`
+    : mod.status === "stub"
+    ? `<h2>Build project</h2><p class="tagline">Coming soon with the module content.</p>`
+    : "";
+
+  app.innerHTML = `
+    <p class="crumbs"><a href="#/">Path</a> / Module ${mod.number}</p>
+    <div class="page-head">
+      <h1>Module ${mod.number}: ${mod.title} ${mod.flagship ? "★" : ""}</h1>
+      <p class="tagline">${mod.tagline}</p>
+    </div>
+    ${mod.status === "stub" ? `<div class="callout"><strong>Coming soon:</strong> the lessons below are planned but not written yet. The schema for adding them is documented in the README — this site is yours to extend.</div>` : ""}
+    <h2>Lessons</h2>
+    <ul class="item-list">${lessonRows}</ul>
+    ${projectRow}
+  `;
+}
+
+/* ------------------------------------------------------------------ */
+/* Lesson page: content + challenge + completion                        */
+/* ------------------------------------------------------------------ */
+
+function renderLesson(app, moduleId, lessonId) {
+  const mod = getModule(moduleId);
+  const lesson = getLesson(moduleId, lessonId);
+  if (!mod || !lesson || lesson.stub) return renderNotFound(app);
+
+  const key = lessonKey(moduleId, lessonId);
+  const done = state.isLessonDone(key);
+
+  // Prev/next within this module's ready lessons, for a guided flow.
+  const ready = readyLessons(mod);
+  const idx = ready.findIndex((l) => l.id === lessonId);
+  const prev = idx > 0 ? ready[idx - 1] : null;
+  const next = idx < ready.length - 1 ? ready[idx + 1] : null;
+
+  app.innerHTML = `
+    <p class="crumbs">
+      <a href="#/">Path</a> /
+      <a href="#/module/${mod.id}">Module ${mod.number}</a> /
+      ${lesson.title}
+    </p>
+    <div class="page-head">
+      <h1>${lesson.title}</h1>
+      <p class="tagline">${lesson.minutes} min · Module ${mod.number}: ${mod.title}</p>
+    </div>
+    <article class="lesson-body">${lesson.content}</article>
+
+    <div id="challenge-slot"></div>
+
+    <div class="lesson-nav">
+      <span>
+        ${prev ? `<a class="btn" href="#/lesson/${mod.id}/${prev.id}">← ${prev.title}</a>` : `<a class="btn" href="#/module/${mod.id}">← Module overview</a>`}
+      </span>
+      <button class="btn ${done ? "" : "btn-primary"}" id="complete-lesson" ${done ? "disabled" : ""}>
+        ${done ? "✓ Lesson complete" : "Mark lesson complete"}
+      </button>
+      <span>
+        ${next ? `<a class="btn" href="#/lesson/${mod.id}/${next.id}">${next.title} →</a>` : `<a class="btn" href="#/module/${mod.id}">Finish module →</a>`}
+      </span>
+    </div>
+  `;
+
+  app.querySelector("#complete-lesson").addEventListener("click", (e) => {
+    state.completeLesson(key, lesson.title);
+    checkAchievements();
+    e.target.disabled = true;
+    e.target.textContent = "✓ Lesson complete";
+    e.target.classList.remove("btn-primary");
+  });
+
+  if (lesson.challenge) {
+    renderChallenge(app.querySelector("#challenge-slot"), key, lesson.challenge);
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/* Challenge widget: editor + Run + Check + console                     */
+/* ------------------------------------------------------------------ */
+
+function renderChallenge(slot, key, challenge) {
+  const passed = state.isChallengePassed(key);
+  const savedCode = state.getSavedCode(key);
+
+  slot.innerHTML = `
+    <section class="challenge" aria-label="Interactive challenge">
+      <div class="challenge-head">
+        <h3>⚡ Challenge: ${challenge.title}</h3>
+        <span class="lang-chip">${challenge.language === "python" ? "Python" : "JavaScript"}</span>
+        ${passed ? `<span class="badge badge-done">Passed ✓</span>` : ""}
+      </div>
+      <div class="challenge-prompt">${challenge.prompt}</div>
+      <div class="editor-wrap">
+        <label class="sub" for="code-${key}" style="display:block;margin-bottom:.35rem;font-size:.75rem;color:var(--text-dim)">
+          Your code (auto-saved as you type — Tab indents)
+        </label>
+        <textarea class="code-input" id="code-${key}" spellcheck="false"
+          autocapitalize="off" autocomplete="off" autocorrect="off"></textarea>
+      </div>
+      <div class="challenge-actions">
+        <button class="btn btn-primary" data-act="run">▶ Run</button>
+        <button class="btn btn-success" data-act="check">✔ Check</button>
+        <button class="btn btn-sm" data-act="hint">💡 Hint</button>
+        <button class="btn btn-sm" data-act="reset">↺ Reset</button>
+        <span class="challenge-status" data-role="status" role="status"></span>
+      </div>
+      <div class="console" data-role="console" aria-live="polite" aria-label="Code output"></div>
+    </section>
+  `;
+
+  const textarea = slot.querySelector("textarea");
+  const consoleEl = slot.querySelector('[data-role="console"]');
+  const statusEl = slot.querySelector('[data-role="status"]');
+  textarea.value = savedCode ?? challenge.starterCode;
+
+  // Tab inserts two spaces instead of leaving the editor. Escape-then-Tab
+  // still moves focus, so keyboard users are never trapped (a11y).
+  let escapePressed = false;
+  textarea.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") { escapePressed = true; return; }
+    if (e.key === "Tab" && !escapePressed) {
+      e.preventDefault();
+      const { selectionStart: s, selectionEnd: en, value } = textarea;
+      textarea.value = value.slice(0, s) + "  " + value.slice(en);
+      textarea.selectionStart = textarea.selectionEnd = s + 2;
+    }
+    escapePressed = false;
+  });
+
+  // Auto-save drafts (debounced) so refreshes never lose work.
+  let saveTimer;
+  textarea.addEventListener("input", () => {
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(() => state.saveCode(key, textarea.value), 400);
+  });
+
+  /* --- console rendering: learner output must never inject HTML --- */
+  const writeLine = (text, cls) => {
+    const line = document.createElement("div");
+    if (cls) line.className = cls;
+    line.textContent = text;
+    consoleEl.appendChild(line);
+  };
+  const clearConsole = () => (consoleEl.innerHTML = "");
+  const setStatus = (text) => (statusEl.textContent = text);
+
+  const showRunResult = (result) => {
+    clearConsole();
+    result.logs.forEach((l) => writeLine(l));
+    if (result.ok) {
+      if (result.logs.length === 0) writeLine("(ran fine — nothing was logged)", "dim");
+    } else {
+      writeLine("✗ " + result.error, "err");
+    }
+    setStatus("");
+  };
+
+  const showCheckResult = (result) => {
+    clearConsole();
+    result.results.forEach((r) => {
+      if (r.ok) {
+        writeLine("✓ " + r.name, "ok");
+      } else {
+        writeLine("✗ " + r.name, "err");
+        writeLine("   " + r.message, "err");
+        if (r.hint) writeLine("   hint: " + r.hint, "hint");
+      }
+    });
+    if (result.passed) {
+      writeLine("", "");
+      writeLine("All tests passed. 🎉", "ok");
+      const first = state.passChallenge(key, challenge.title);
+      checkAchievements();
+      setStatus(first ? "Challenge passed!" : "Still passing ✓");
+      const head = slot.querySelector(".challenge-head");
+      if (!head.querySelector(".badge-done")) {
+        const badge = document.createElement("span");
+        badge.className = "badge badge-done";
+        badge.textContent = "Passed ✓";
+        head.appendChild(badge);
+      }
+    } else {
+      const failed = result.results.filter((r) => !r.ok).length;
+      setStatus(`${result.results.length - failed}/${result.results.length} tests passing`);
+    }
+  };
+
+  slot.querySelector('[data-act="run"]').addEventListener("click", async () => {
+    if (challenge.language === "python") {
+      setStatus("…");
+      const result = await runPython(textarea.value, setStatus);
+      showRunResult(result);
+    } else {
+      showRunResult(runJS(textarea.value));
+    }
+  });
+
+  slot.querySelector('[data-act="check"]').addEventListener("click", async () => {
+    if (challenge.language === "python") {
+      setStatus("…");
+      const result = await checkPython(textarea.value, challenge.tests, setStatus);
+      showCheckResult(result);
+      setStatus(statusEl.textContent || "");
+    } else {
+      showCheckResult(checkJS(textarea.value, challenge.tests));
+    }
+  });
+
+  slot.querySelector('[data-act="hint"]').addEventListener("click", () => {
+    clearConsole();
+    writeLine("💡 " + challenge.hint, "hint");
+  });
+
+  slot.querySelector('[data-act="reset"]').addEventListener("click", () => {
+    textarea.value = challenge.starterCode;
+    state.saveCode(key, challenge.starterCode);
+    clearConsole();
+    setStatus("Reset to starter code");
+  });
+}
+
+/* ------------------------------------------------------------------ */
+/* Project page: brief + persisted checklist                            */
+/* ------------------------------------------------------------------ */
+
+function renderProject(app, moduleId) {
+  const mod = getModule(moduleId);
+  if (!mod || !mod.project) return renderNotFound(app);
+  const project = mod.project;
+  const checks = state.getProjectChecks(project.id);
+  const doneAlready = state.isProjectDone(project.id);
+
+  const items = project.checklist
+    .map((item) => {
+      const ticked = !!checks[item.id];
+      return `
+        <li class="${ticked ? "ticked" : ""}">
+          <label>
+            <input type="checkbox" data-item="${item.id}" ${ticked ? "checked" : ""} />
+            <span>${item.text}</span>
+          </label>
+        </li>`;
+    })
+    .join("");
+
+  app.innerHTML = `
+    <p class="crumbs">
+      <a href="#/">Path</a> /
+      <a href="#/module/${mod.id}">Module ${mod.number}</a> /
+      Project
+    </p>
+    <div class="page-head">
+      <h1>🛠️ ${project.title}</h1>
+      <p class="tagline">Build project · Module ${mod.number}: ${mod.title}</p>
+    </div>
+    <div class="project-brief">
+      ${project.brief}
+      <div class="callout"><strong>Self-assessment:</strong> tick each item only
+      when it's genuinely true — this checklist is your engineering integrity in
+      miniature. Ticks persist on this device; completing all of them earns the
+      project XP${doneAlready ? " (already earned ✓)" : ""}.</div>
+      <ul class="checklist">${items}</ul>
+      <p id="project-status" role="status" class="tagline">${
+        doneAlready ? "✓ Project complete — well built." : ""
+      }</p>
+    </div>
+  `;
+
+  app.querySelectorAll('input[type="checkbox"]').forEach((box) => {
+    box.addEventListener("change", () => {
+      state.setProjectCheck(project.id, box.dataset.item, box.checked);
+      box.closest("li").classList.toggle("ticked", box.checked);
+
+      const allTicked = project.checklist.every(
+        (item) => state.getProjectChecks(project.id)[item.id]
+      );
+      if (allTicked) {
+        state.completeProject(project.id, project.title);
+        checkAchievements();
+        app.querySelector("#project-status").textContent = "✓ Project complete — well built.";
+      }
+    });
+  });
+}
+
+/* ------------------------------------------------------------------ */
+/* Achievements shelf                                                   */
+/* ------------------------------------------------------------------ */
+
+function renderAchievements(app) {
+  const earned = state.getAchievements();
+  const earnedCount = Object.keys(earned).length;
+
+  const shelf = ACHIEVEMENTS.map((a) => {
+    const at = earned[a.id];
+    return `
+      <li class="trophy ${at ? "earned" : "locked"}">
+        <span class="emoji" aria-hidden="true">${a.emoji}</span>
+        <div>
+          <h4>${a.name}</h4>
+          <p>${a.competency}</p>
+          ${at ? `<span class="earned-date">Earned ${new Date(at).toLocaleDateString()}</span>` : ""}
+        </div>
+      </li>`;
+  }).join("");
+
+  app.innerHTML = `
+    <div class="page-head">
+      <h1>Achievements</h1>
+      <p class="tagline">${earnedCount} of ${ACHIEVEMENTS.length} earned — each one
+      is a real engineering competency, not a login streak.</p>
+    </div>
+    <ul class="shelf">${shelf}</ul>
+  `;
+}
+
+/* ------------------------------------------------------------------ */
+
+function renderNotFound(app) {
+  app.innerHTML = `
+    <div class="page-head">
+      <h1>404 — nothing here</h1>
+      <p class="tagline">This route doesn't exist. A good engineer checks the URL first. 😉</p>
+    </div>
+    <a class="btn btn-primary" href="#/">← Back to the path</a>`;
+}
+
+/* ================= js/main.js ================= */
+/**
+ * main.js — boot, hash router, header HUD, theme toggle.
+ *
+ * Routing uses the URL hash (#/lesson/m1/l1) because GitHub Pages serves
+ * static files only: a hash change never triggers a server request, so no
+ * 404 tricks are needed and the back button works for free.
+ */
+
+
+
+const app = document.getElementById("app");
+
+/* ---------------- Router ---------------- */
+
+function route() {
+  // "#/lesson/m1/l2" → ["lesson", "m1", "l2"]
+  const hash = window.location.hash.replace(/^#\/?/, "");
+  const parts = hash.split("/").filter(Boolean);
+
+  if (parts.length === 0) {
+    renderHome(app);
+  } else if (parts[0] === "module" && parts[1]) {
+    renderModule(app, parts[1]);
+  } else if (parts[0] === "lesson" && parts[1] && parts[2]) {
+    renderLesson(app, parts[1], parts[2]);
+  } else if (parts[0] === "project" && parts[1]) {
+    renderProject(app, parts[1]);
+  } else if (parts[0] === "achievements") {
+    renderAchievements(app);
+  } else {
+    renderNotFound(app);
+  }
+
+  updateNavHighlight(parts[0] || "home");
+  // New page: scroll to the top and move focus to main content so keyboard
+  // and screen-reader users land where the new content starts.
+  window.scrollTo(0, 0);
+  app.focus({ preventScroll: true });
+}
+
+function updateNavHighlight(section) {
+  document.querySelectorAll(".site-nav a[data-nav]").forEach((a) => {
+    const isActive =
+      a.dataset.nav === section ||
+      (a.dataset.nav === "home" && ["module", "lesson", "project"].includes(section));
+    a.classList.toggle("active", isActive);
+  });
+}
+
+/* ---------------- Header HUD ---------------- */
+
+function updateHUD() {
+  const { level, title, pct } = state.getLevel();
+  document.getElementById("hud-level").textContent = level;
+  document.getElementById("hud-title").textContent = title;
+  document.getElementById("hud-xp-fill").style.width = pct + "%";
+  document.getElementById("hud-xp-text").textContent = state.getXP() + " XP";
+}
+
+/* ---------------- Boot ---------------- */
+
+// Re-render the HUD whenever progress changes (XP, achievements, settings).
+state.subscribe(updateHUD);
+updateHUD();
+
+document.getElementById("theme-toggle").addEventListener("click", () => {
+  state.toggleTheme();
+});
+
+// In case a save from an older visit qualifies for achievements added since.
+checkAchievements();
+
+window.addEventListener("hashchange", route);
+route();
+
+  </script>
+</body>
+</html>
